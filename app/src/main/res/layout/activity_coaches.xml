@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBarCoaches"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:title="Entrenadores"
+            app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCoaches"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddCoach"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:contentDescription="Agregar entrenador"
+        app:srcCompat="@drawable/ic_person"
+        app:layout_anchorGravity="bottom|end"
+        app:layout_anchor="@id/rvCoaches" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
