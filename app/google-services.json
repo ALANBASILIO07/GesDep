@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "601751592002",
-    "project_id": "gesdep-e3cbb",
-    "storage_bucket": "gesdep-e3cbb.firebasestorage.app"
+    "project_number": "479735260140",
+    "project_id": "gesdep-90334",
+    "storage_bucket": "gesdep-90334.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:601751592002:android:d320ee8e7e7030c56ae1db",
+        "mobilesdk_app_id": "1:479735260140:android:9348bf5029a6268e0716c9",
         "android_client_info": {
-          "package_name": "com.example.gesdep"
+          "package_name": "com.uaemex.gesdep"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBziZ10EfSMG0gd6KhT9uEE9dNtod6hODc"
+          "current_key": "AIzaSyDmWUfoo49kZBKGEC1xzcS_AfhKUflA-sg"
         }
       ],
       "services": {
