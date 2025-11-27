@@ -1,5 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Primary Colors -->
+    <color name="green_primary">#2C6B5B</color>
+    <color name="green_dark">#1E4D40</color>
+    <color name="green_light">#3D8270</color>
+
+    <!-- Secondary Colors -->
+    <color name="blue_button">#4285F4</color>
+    <color name="orange_coach">#F58220</color>
+    <color name="purple_participants">#9C27B0</color>
+    <color name="teal_maintenance">#00695C</color>
+
+    <!-- Neutral Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="gray_text">#666666</color>
+    <color name="gray_dark">#333333</color>
+    <color name="gray_light">#F5F5F5</color>
+
+    <!-- System Colors -->
+    <color name="colorPrimary">#2C6B5B</color>
+    <color name="colorPrimaryDark">#1E4D40</color>
+    <color name="colorAccent">#4285F4</color>
 </resources>

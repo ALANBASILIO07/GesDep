@@ -1,9 +1,21 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Gesdep" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-    </style>
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme -->
+    <style name="Theme.GESDEP" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorPrimaryVariant">@color/green_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
 
-    <style name="Theme.Gesdep" parent="Base.Theme.Gesdep" />
+        <!-- Secondary brand color -->
+        <item name="colorSecondary">@color/blue_button</item>
+        <item name="colorSecondaryVariant">@color/blue_button</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@color/green_primary</item>
+
+        <!-- Customize your theme here -->
+        <item name="android:windowBackground">@color/gray_light</item>
+    </style>
 </resources>

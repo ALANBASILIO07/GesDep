@@ -18,16 +18,35 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    // FIX DEFINITIVO 16 KB PAGE SIZE (Android 15+)
+    packaging {
+        jniLibs {
+            // Esto fuerza alineación de 16 KB en todas las librerías nativas (.so)
+            useLegacyPackaging = false
+        }
+        // Si después del rebuild sigue apareciendo el warning, descomenta la siguiente línea:
+        // exclude("**/libimage_processing_util_jni.so")
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    // Si más adelante usas Kotlin con código nativo (C/C++), agrega esto:
+    // externalNativeBuild {
+    //     cmake { version = "3.22.1" }
+    // }
 }
 
 dependencies {
-
     // Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-messaging") // Notificaciones Push
+    implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.firebase:firebase-analytics")
 
     // Material Design
@@ -37,28 +56,22 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
-    // RecyclerView
+    // UI
     implementation("androidx.recyclerview:recyclerview:1.3.2")
-
-    // AppCompat
     implementation("androidx.appcompat:appcompat:1.7.0")
-
-    // ConstraintLayout
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation(libs.activity)
-
-    // GridLayout
     implementation("androidx.gridlayout:gridlayout:1.0.0")
 
-    // WorkManager para sincronización en background
+    // WorkManager
     implementation("androidx.work:work-runtime:2.9.0")
 
-    // Glide para carga de imágenes
+    // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
-    // CameraX para funcionalidad de cámara
-    val cameraxVersion = "1.3.1"
+    // CameraX → versión con soporte 16 KB nativo (la más estable al día de hoy)
+    val cameraxVersion = "1.4.0"
     implementation("androidx.camera:camera-core:$cameraxVersion")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
@@ -66,12 +79,12 @@ dependencies {
     implementation("androidx.camera:camera-view:$cameraxVersion")
     implementation("androidx.camera:camera-extensions:$cameraxVersion")
 
-    // Navigation Component para Fragments (Fase 10)
+    // Navigation
     val navVersion = "2.7.7"
     implementation("androidx.navigation:navigation-fragment:$navVersion")
     implementation("androidx.navigation:navigation-ui:$navVersion")
 
-    // Lifecycle components
+    // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
 }

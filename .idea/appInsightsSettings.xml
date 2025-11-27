@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.uaemex.gesdep" />
-                  <option name="mobileSdkAppId" value="1:479735260140:android:9348bf5029a6268e0716c9" />
-                  <option name="projectId" value="gesdep-90334" />
-                  <option name="projectNumber" value="479735260140" />
+                  <option name="mobileSdkAppId" value="1:893272800368:android:d46471ea63420f1cedc8b5" />
+                  <option name="projectId" value="gesdep-uaemex" />
+                  <option name="projectNumber" value="893272800368" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

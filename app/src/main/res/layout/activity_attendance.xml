@@ -1,19 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
 
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="#2C6B5B"
+        app:title="Registro de Asistencia"
+        app:titleTextColor="#FFFFFF"
+        app:navigationIcon="@drawable/ic_back"
+        app:navigationIconTint="#FFFFFF">
 
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_more_vert"
+            app:tint="#FFFFFF" />
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <!-- Map Container -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Google Map Fragment -->
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+    <!-- Register Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRegisterAttendance"
-        android:text="REGISTRAR ASISTENCIA"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_margin="16dp"
         android:layout_width="match_parent"
-        android:layout_height="56dp" />
-</FrameLayout>
+        android:layout_height="56dp"
+        android:layout_margin="16dp"
+        android:text="REGISTRAR ASISTENCIA"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:letterSpacing="0.05"
+        app:backgroundTint="#4285F4"
+        app:cornerRadius="8dp" />
+
+</LinearLayout>

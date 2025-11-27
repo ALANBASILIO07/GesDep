@@ -20,7 +20,7 @@ import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText etEmail, etPass;
+    private EditText etEmail, etPassword;
     private Button btnLogin;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
@@ -37,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         etEmail = findViewById(R.id.etEmail);
-        etPass = findViewById(R.id.etPass);
+        etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
 
         auth = FirebaseAuth.getInstance();
@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void login() {
         String email = etEmail.getText().toString().trim();
-        String pass = etPass.getText().toString().trim();
+        String pass = etPassword.getText().toString().trim();
 
         if (email.isEmpty() || pass.isEmpty()) {
             Toast.makeText(this, "Completa los campos", Toast.LENGTH_SHORT).show();

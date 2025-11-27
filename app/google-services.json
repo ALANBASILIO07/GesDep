@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "479735260140",
-    "project_id": "gesdep-90334",
-    "storage_bucket": "gesdep-90334.firebasestorage.app"
+    "project_number": "893272800368",
+    "project_id": "gesdep-uaemex",
+    "storage_bucket": "gesdep-uaemex.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:479735260140:android:9348bf5029a6268e0716c9",
+        "mobilesdk_app_id": "1:893272800368:android:d46471ea63420f1cedc8b5",
         "android_client_info": {
           "package_name": "com.uaemex.gesdep"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDmWUfoo49kZBKGEC1xzcS_AfhKUflA-sg"
+          "current_key": "AIzaSyCkUrdxp4_14CJ_cQxC3B3o6hvOjVXadBA"
         }
       ],
       "services": {

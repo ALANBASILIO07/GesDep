@@ -3,7 +3,7 @@ package com.uaemex.gesdep;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,7 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ActivityDetailActivity extends AppCompatActivity {
 
-    private EditText etName, etCoach, etSchedule, etLocation;
+    private TextView tvName, tvCoach, tvSchedule, tvLocation;
     private Button btnAttendance;
     private FirebaseFirestore db;
     private String activityId;
@@ -22,10 +22,10 @@ public class ActivityDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        etName = findViewById(R.id.etName);
-        etCoach = findViewById(R.id.etCoach);
-        etSchedule = findViewById(R.id.etSchedule);
-        etLocation = findViewById(R.id.etLocation);
+        tvName = findViewById(R.id.tvName);
+        tvCoach = findViewById(R.id.tvCoach);
+        tvSchedule = findViewById(R.id.tvSchedule);
+        tvLocation = findViewById(R.id.tvLocation);
         btnAttendance = findViewById(R.id.btnAttendance);
 
         db = FirebaseFirestore.getInstance();
@@ -46,10 +46,10 @@ public class ActivityDetailActivity extends AppCompatActivity {
                 .addOnSuccessListener(d -> {
                     ActivityModel m = d.toObject(ActivityModel.class);
                     if (m != null) {
-                        etName.setText(m.name);
-                        etCoach.setText(m.coachName);
-                        etSchedule.setText(m.schedule);
-                        etLocation.setText(m.place);
+                        tvName.setText(m.name);
+                        tvCoach.setText(m.coachName);
+                        tvSchedule.setText(m.schedule);
+                        tvLocation.setText(m.place);
                     }
                 })
                 .addOnFailureListener(e ->
