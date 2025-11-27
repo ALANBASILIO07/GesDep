@@ -36,41 +36,72 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GESDEP">
+
+        <!-- Welcome Activity - LAUNCHER -->
         <activity
-            android:name=".MaintenanceActivity"
-            android:exported="false" />
+            android:name=".WelcomeActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Auth Activities -->
         <activity
-            android:name=".ParticipantsActivity"
+            android:name=".RegisterActivity"
             android:exported="false" />
+
         <activity
-            android:name=".CoachesActivity"
+            android:name=".LoginActivity"
             android:exported="false" />
+
+        <!-- Home Activities -->
         <activity
-            android:name=".AttendanceActivity"
+            android:name=".UserHomeActivity"
             android:exported="false" />
+
         <activity
-            android:name=".ActivityDetailActivity"
+            android:name=".AdminHomeActivity"
             android:exported="false" />
-        <activity
-            android:name=".ActivitiesListActivity"
-            android:exported="false" />
+
         <activity
             android:name=".HomeActivity"
             android:exported="false" />
+
+        <!-- Events -->
         <activity
             android:name=".EventsActivity"
             android:exported="false"
             android:label="Eventos" />
-        <activity
-            android:name=".LoginActivity"
-            android:exported="true">  <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-        </activity>
 
         <activity
             android:name=".CreateEventActivity"
+            android:exported="false" />
+
+        <!-- Other Activities -->
+        <activity
+            android:name=".MaintenanceActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ParticipantsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CoachesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AttendanceActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ActivityDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ActivitiesListActivity"
             android:exported="false" />
 
         <!-- Servicio de Firebase Cloud Messaging -->
@@ -82,7 +113,7 @@
             </intent-filter>
         </service>
 
-        <!-- API KEY de Google Maps, la referencia está en strings.xml -->
+        <!-- API KEY de Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
