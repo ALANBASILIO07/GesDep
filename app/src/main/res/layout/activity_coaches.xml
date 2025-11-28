@@ -1,36 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/gray_light">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBarCoaches"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:title="Entrenadores"
-            app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel" />
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/green_primary"
+            app:title="Directorio de Entrenadores"
+            app:titleTextColor="@color/white"
+            app:navigationIcon="@drawable/abc_ic_ab_back_material"
+            app:navigationIconTint="@color/white"/>
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvCoaches"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvCoaches"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:padding="16dp"
+        android:clipToPadding="false"
+        tools:listitem="@layout/support_simple_spinner_dropdown_item"/>
+
+    <LinearLayout
+        android:id="@+id/emptyState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_person"
+            app:tint="@color/gray_text"
+            android:alpha="0.5"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Sin entrenadores" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sin entrenadores"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/orange_coach"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registra a los instructores encargados\nde las actividades."
+            android:textSize="14sp"
+            android:textColor="@color/gray_text"
+            android:gravity="center"/>
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddCoach"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
         android:contentDescription="Agregar entrenador"
-        app:srcCompat="@drawable/ic_person"
-        app:layout_anchorGravity="bottom|end"
-        app:layout_anchor="@id/rvCoaches" />
+        android:src="@drawable/ic_person"
+        app:tint="@color/white"
+        app:backgroundTint="@color/orange_coach"
+        app:elevation="6dp"
+        app:pressedTranslationZ="12dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

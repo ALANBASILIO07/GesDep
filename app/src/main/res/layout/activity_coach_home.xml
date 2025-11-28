@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout_coach"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:openDrawer="start">
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/gray_light">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:elevation="0dp">
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbarCoach"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/green_primary"
+                app:title="GESDEP - Entrenador"
+                app:titleTextColor="@color/white"
+                app:navigationIcon="@drawable/ic_menu"
+                app:navigationIconTint="@color/white"/>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="@color/green_primary"
+                    app:cardElevation="4dp">
+
+                    <ImageView
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:src="@drawable/ic_person"
+                        app:tint="#33FFFFFF"
+                        android:layout_gravity="end|bottom"
+                        android:translationX="20dp"
+                        android:translationY="20dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp">
+
+                        <TextView
+                            android:id="@+id/tvCoachWelcome"
+                            android:text="¡Hola, Entrenador!"
+                            android:textSize="22sp"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="4dp"/>
+
+                        <TextView
+                            android:text="Gestiona tus grupos y asistencias"
+                            android:textSize="14sp"
+                            android:textColor="#E0E0E0"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp"
+                    android:baselineAligned="false">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardCoachGroups"
+                        style="@style/DashboardCardStyle"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp">
+                        <LinearLayout style="@style/DashboardContainerStyle">
+                            <ImageView
+                                style="@style/DashboardIconStyle"
+                                android:src="@drawable/ic_group"
+                                app:tint="@color/purple_participants"/>
+                            <TextView
+                                style="@style/DashboardTextStyle"
+                                android:text="Mis\nGrupos"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardCoachAttendance"
+                        style="@style/DashboardCardStyle"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp">
+                        <LinearLayout style="@style/DashboardContainerStyle">
+                            <ImageView
+                                style="@style/DashboardIconStyle"
+                                android:src="@drawable/ic_check"
+                                app:tint="@color/green_primary"/>
+                            <TextView
+                                style="@style/DashboardTextStyle"
+                                android:text="Registrar\nAsistencia"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardCoachProfile"
+                        style="@style/DashboardCardStyle"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp">
+                        <LinearLayout style="@style/DashboardContainerStyle">
+                            <ImageView
+                                style="@style/DashboardIconStyle"
+                                android:src="@drawable/ic_person"
+                                app:tint="@color/orange_coach" />
+                            <TextView
+                                style="@style/DashboardTextStyle"
+                                android:text="Mi\nPerfil" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardCoachLogout"
+                        style="@style/DashboardCardStyle"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp">
+                        <LinearLayout style="@style/DashboardContainerStyle">
+                            <ImageView
+                                style="@style/DashboardIconStyle"
+                                android:src="@drawable/ic_logout"
+                                app:tint="#D32F2F" />
+                            <TextView
+                                style="@style/DashboardTextStyle"
+                                android:text="Cerrar\nSesión"
+                                android:textColor="#D32F2F"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view_coach"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        style="@style/Widget.MaterialComponents.NavigationView"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/drawer_coach"
+        app:itemIconTint="@color/green_primary"
+        app:itemTextColor="@color/gray_dark"/>
+
+</androidx.drawerlayout.widget.DrawerLayout>

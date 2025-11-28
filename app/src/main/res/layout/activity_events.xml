@@ -2,48 +2,87 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/gray_light">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/green_primary"
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Eventos Deportivos y Culturales" />
+            app:title="Eventos Disponibles"
+            app:titleTextColor="@color/white"
+            app:navigationIcon="@drawable/abc_ic_ab_back_material"
+            app:navigationIconTint="@color/white"/>
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroup"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="8dp"
-            app:singleSelection="true">
+            android:orientation="vertical"
+            android:background="@color/white"
+            android:paddingVertical="8dp"
+            android:paddingHorizontal="16dp">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAll"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Todos"
-                android:checked="true"
-                style="@style/Widget.Material3.Chip.Filter" />
+                android:text="Filtrar por categoría:"
+                android:textSize="12sp"
+                android:textColor="@color/gray_text"
+                android:layout_marginBottom="4dp"/>
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipSports"
-                android:layout_width="wrap_content"
+            <HorizontalScrollView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Deportivos"
-                style="@style/Widget.Material3.Chip.Filter" />
+                android:scrollbars="none">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipCultural"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Culturales"
-                style="@style/Widget.Material3.Chip.Filter" />
-        </com.google.android.material.chip.ChipGroup>
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipAll"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Todos"
+                        android:checked="true"
+                        android:textColor="@color/black"
+                        app:chipBackgroundColor="@color/gray_light" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSports"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Deportivos"
+                        app:chipIcon="@drawable/ic_sports"
+                        android:textColor="@color/black"
+                        app:chipBackgroundColor="@color/gray_light" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipCultural"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Culturales"
+                        app:chipIcon="@drawable/ic_group"
+                        android:textColor="@color/black"
+                        app:chipBackgroundColor="@color/gray_light" />
+
+                </com.google.android.material.chip.ChipGroup>
+            </HorizontalScrollView>
+        </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -51,41 +90,56 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:padding="8dp"
-        android:clipToPadding="false" />
+        android:padding="16dp"
+        android:clipToPadding="false"
+        tools:listitem="@layout/support_simple_spinner_dropdown_item"/>
 
-    <!-- Empty State -->
     <LinearLayout
         android:id="@+id/emptyState"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="vertical"
         android:visibility="gone"
-        android:gravity="center">
+        android:gravity="center"
+        android:padding="32dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="📅"
-            android:textSize="48sp" />
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_calendar"
+            app:tint="@color/gray_text"
+            android:alpha="0.5"
+            android:layout_marginBottom="16dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="No hay eventos disponibles"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_marginTop="8dp" />
+            android:textColor="@color/green_dark"
+            android:layout_marginBottom="8dp"
+            android:textAlignment="center"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Los eventos aparecerán aquí cuando estén disponibles"
+            android:text="Parece que no hay actividades programadas para esta categoría por el momento."
             android:textSize="14sp"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:layout_marginTop="4dp"
-            android:gravity="center" />
+            android:textColor="@color/gray_text"
+            android:textAlignment="center"
+            android:lineSpacingExtra="4dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRefresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Actualizar"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:textColor="@color/green_primary"
+            android:layout_marginTop="16dp"/>
+
     </LinearLayout>
 
     <ProgressBar
@@ -93,5 +147,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:indeterminateTint="@color/green_primary"
         android:visibility="gone" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

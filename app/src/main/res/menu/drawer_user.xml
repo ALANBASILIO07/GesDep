@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home_user"
+            android:icon="@drawable/ic_trophy"
+            android:title="Inicio" />
+        <item
+            android:id="@+id/nav_explore"
+            android:icon="@drawable/ic_calendar"
+            android:title="Explorar Eventos" />
+        <item
+            android:id="@+id/nav_my_inscriptions"
+            android:icon="@drawable/ic_check"
+            android:title="Mis Inscripciones" />
+    </group>
+
+    <item android:title="Perfil">
+        <menu>
+            <item
+                android:id="@+id/nav_profile"
+                android:icon="@drawable/ic_person"
+                android:title="Mi Perfil" />
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_logout"
+                android:title="Cerrar Sesión" />
+        </menu>
+    </item>
+</menu>

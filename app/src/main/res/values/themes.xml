@@ -1,21 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme -->
     <style name="Theme.GESDEP" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color -->
         <item name="colorPrimary">@color/green_primary</item>
         <item name="colorPrimaryVariant">@color/green_dark</item>
         <item name="colorOnPrimary">@color/white</item>
 
-        <!-- Secondary brand color -->
         <item name="colorSecondary">@color/blue_button</item>
         <item name="colorSecondaryVariant">@color/blue_button</item>
         <item name="colorOnSecondary">@color/white</item>
 
-        <!-- Status bar color -->
         <item name="android:statusBarColor">@color/green_primary</item>
 
-        <!-- Customize your theme here -->
         <item name="android:windowBackground">@color/gray_light</item>
     </style>
+
+    <style name="DashboardCardStyle" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+    </style>
+
+    <style name="DashboardContainerStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">140dp</item> <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="DashboardIconStyle">
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginBottom">12dp</item>
+    </style>
+
+    <style name="DashboardTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/gray_dark</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
 </resources>

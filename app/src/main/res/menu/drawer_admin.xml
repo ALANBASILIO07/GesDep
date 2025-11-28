@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_trophy"
+            android:title="Inicio" />
+        <item
+            android:id="@+id/nav_events"
+            android:icon="@drawable/ic_calendar"
+            android:title="Gestionar Eventos" />
+        <item
+            android:id="@+id/nav_participants"
+            android:icon="@drawable/ic_group"
+            android:title="Participantes" />
+        <item
+            android:id="@+id/nav_coaches"
+            android:icon="@drawable/ic_person"
+            android:title="Entrenadores" />
+        <item
+            android:id="@+id/nav_reports"
+            android:icon="@drawable/ic_tools"
+            android:title="Mantenimiento" />
+    </group>
+
+    <item android:title="Cuenta">
+        <menu>
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_settings"
+                android:title="Configuración" />
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_logout"
+                android:title="Cerrar Sesión" />
+        </menu>
+    </item>
+</menu>

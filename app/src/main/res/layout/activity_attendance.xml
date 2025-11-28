@@ -1,56 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="@color/gray_light">
 
-    <!-- Toolbar -->
+    <!-- 1. Toolbar Corporativa -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#2C6B5B"
-        app:title="Registro de Asistencia"
-        app:titleTextColor="#FFFFFF"
-        app:navigationIcon="@drawable/ic_back"
-        app:navigationIconTint="#FFFFFF">
+        android:background="@color/green_primary"
+        app:title="Ubicación y Asistencia"
+        app:titleTextColor="@color/white"
+        app:navigationIcon="@drawable/abc_ic_ab_back_material"
+        app:navigationIconTint="@color/white"
+        app:menu="@menu/menu_attendance" />
+    <!-- Nota: Si tienes un menú de opciones (tres puntos), defínelo en res/menu/menu_attendance.xml -->
 
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="end"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_more_vert"
-            app:tint="#FFFFFF" />
-    </com.google.android.material.appbar.MaterialToolbar>
-
-    <!-- Map Container -->
+    <!-- 2. Contenedor del Mapa -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- Google Map Fragment -->
+        <!-- Fragmento del Mapa -->
         <fragment
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
+
+        <!-- Tarjeta de Estado Flotante (Overlay) -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="#F0FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/ic_menu_myplaces"
+                    app:tint="@color/green_primary"
+                    android:layout_marginEnd="8dp"/>
+
+                <TextView
+                    android:id="@+id/tvMapStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    text="Verificando ubicación..."
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/green_primary"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
     </FrameLayout>
 
-    <!-- Register Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnRegisterAttendance"
+    <!-- 3. Panel de Acción Inferior -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_margin="16dp"
-        android:text="REGISTRAR ASISTENCIA"
-        android:textSize="16sp"
-        android:textColor="#FFFFFF"
-        android:letterSpacing="0.05"
-        app:backgroundTint="#4285F4"
-        app:cornerRadius="8dp" />
+        android:layout_height="wrap_content"
+        app:cardElevation="16dp"
+        app:cardCornerRadius="0dp"
+        app:cardBackgroundColor="@color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Confirma que te encuentras en las instalaciones deportivas para registrar tu asistencia."
+                android:textSize="14sp"
+                android:textColor="@color/gray_text"
+                android:textAlignment="center"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Botón Registrar (Verde) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRegisterAttendance"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="REGISTRAR ASISTENCIA"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/green_primary"
+                app:cornerRadius="8dp"
+                app:icon="@drawable/ic_check"
+                app:iconGravity="textStart"
+                app:elevation="2dp"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>
