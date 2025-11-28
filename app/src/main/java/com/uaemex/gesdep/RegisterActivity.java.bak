@@ -59,7 +59,7 @@ public class RegisterActivity extends AppCompatActivity {
     private void setupListeners() {
         findViewById(R.id.tvLogin).setOnClickListener(v -> finish());
         rgUserType.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.rbOrganizer || checkedId == R.id.rbCoach) {
+            if (checkedId == R.id.rbOrganizer) {
                 organizationCodeLayout.setVisibility(View.VISIBLE);
             } else {
                 organizationCodeLayout.setVisibility(View.GONE);
@@ -112,37 +112,18 @@ public class RegisterActivity extends AppCompatActivity {
         int selectedRole = rgUserType.getCheckedRadioButtonId();
         String userRole;
 
-
         if (selectedRole == R.id.rbOrganizer) {
+            // Validar código de organización
             if (!orgCode.equals(ORGANIZATION_CODE)) {
-                etOrganizationCode.setError("Código inválido");
+                etOrganizationCode.setError("Código de organización inválido");
                 etOrganizationCode.requestFocus();
-                Toast.makeText(this, "Código inválido", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Código inválido. Contacte al administrador.", Toast.LENGTH_LONG).show();
                 return;
             }
             userRole = "admin";
-        } else if (selectedRole == R.id.rbCoach) {
-            if (!orgCode.equals(ORGANIZATION_CODE)) {
-                etOrganizationCode.setError("Código inválido");
-                etOrganizationCode.requestFocus();
-                Toast.makeText(this, "Código inválido", Toast.LENGTH_LONG).show();
-                return;
-            }
-            userRole = "coach";
         } else {
             userRole = "user";
         }
-
-
-
-
-
-
-
-
-
-
-
 
         // Registrar usuario
         registerUser(fullName, email, password, userRole);
@@ -211,8 +192,6 @@ public class RegisterActivity extends AppCompatActivity {
         Intent intent;
         if (role.equals("admin")) {
             intent = new Intent(this, AdminHomeActivity.class);
-        } else if (role.equals("coach")) {
-            intent = new Intent(this, CoachHomeActivity.class);
         } else {
             intent = new Intent(this, UserHomeActivity.class);
         }
@@ -220,5 +199,4 @@ public class RegisterActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
-}
 }

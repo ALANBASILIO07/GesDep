@@ -1,30 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Permisos de ubicación -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- Permisos de red -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <!-- Permisos de cámara y multimedia -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
-    <!-- Permisos de almacenamiento (para imágenes y videos) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-
-    <!-- Permisos de notificaciones (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Features de hardware -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
@@ -37,7 +27,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GESDEP">
 
-        <!-- Welcome Activity - LAUNCHER -->
         <activity
             android:name=".WelcomeActivity"
             android:exported="true">
@@ -47,7 +36,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Auth Activities -->
         <activity
             android:name=".RegisterActivity"
             android:exported="false" />
@@ -56,7 +44,6 @@
             android:name=".LoginActivity"
             android:exported="false" />
 
-        <!-- Home Activities -->
         <activity
             android:name=".UserHomeActivity"
             android:exported="false" />
@@ -66,10 +53,13 @@
             android:exported="false" />
 
         <activity
+            android:name=".CoachHomeActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".HomeActivity"
             android:exported="false" />
 
-        <!-- Events -->
         <activity
             android:name=".EventsActivity"
             android:exported="false"
@@ -79,7 +69,6 @@
             android:name=".CreateEventActivity"
             android:exported="false" />
 
-        <!-- Other Activities -->
         <activity
             android:name=".MaintenanceActivity"
             android:exported="false" />
@@ -104,7 +93,6 @@
             android:name=".ActivitiesListActivity"
             android:exported="false" />
 
-        <!-- Servicio de Firebase Cloud Messaging -->
         <service
             android:name=".services.MyFirebaseMessagingService"
             android:exported="false">
@@ -113,12 +101,10 @@
             </intent-filter>
         </service>
 
-        <!-- API KEY de Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <!-- Canal de notificaciones predeterminado para FCM -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="gesdep_events_channel" />

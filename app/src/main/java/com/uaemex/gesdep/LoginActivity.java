@@ -118,12 +118,13 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void redirectToHome(String role) {
-        // Registrar token FCM para notificaciones push
         MyFirebaseMessagingService.registerFCMToken(this);
 
         Intent intent;
         if (role.equals("admin")) {
             intent = new Intent(this, AdminHomeActivity.class);
+        } else if (role.equals("coach")) {
+            intent = new Intent(this, CoachHomeActivity.class);
         } else {
             intent = new Intent(this, UserHomeActivity.class);
         }
@@ -132,4 +133,5 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+}
 }

@@ -2,23 +2,26 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_home_coach"
-            android:icon="@drawable/ic_person"
+            android:id="@+id/nav_coach_home"
+            android:icon="@drawable/ic_home"
             android:title="Inicio" />
         <item
-            android:id="@+id/nav_my_groups"
+            android:id="@+id/nav_coach_my_groups"
             android:icon="@drawable/ic_group"
             android:title="Mis Grupos" />
         <item
-            android:id="@+id/nav_attendance"
-            android:icon="@drawable/ic_check"
-            android:title="Registrar Asistencia" />
+            android:id="@+id/nav_coach_schedule"
+            android:icon="@drawable/ic_calendar"
+            android:title="Mi Horario" />
+        <item
+            android:id="@+id/nav_coach_profile"
+            android:icon="@drawable/ic_person"
+            android:title="Mi Perfil" />
     </group>
-
-    <item android:title="Cuenta">
+    <item android:title="Sesión">
         <menu>
             <item
-                android:id="@+id/nav_logout"
+                android:id="@+id/nav_coach_logout"
                 android:icon="@drawable/ic_logout"
                 android:title="Cerrar Sesión" />
         </menu>

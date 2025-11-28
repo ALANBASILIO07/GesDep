@@ -18,7 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class UserHomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class CoachHomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
     private TextView tvWelcome;
@@ -28,24 +28,25 @@ public class UserHomeActivity extends AppCompatActivity implements NavigationVie
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_home);
+        setContentView(R.layout.activity_coach_home);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        MaterialToolbar toolbar = findViewById(R.id.toolbarUser);
+        MaterialToolbar toolbar = findViewById(R.id.toolbarCoach);
         setSupportActionBar(toolbar);
 
-        drawerLayout = findViewById(R.id.drawer_layout_user);
-        NavigationView navigationView = findViewById(R.id.nav_view_user);
+        drawerLayout = findViewById(R.id.drawer_layout_coach);
+        NavigationView navigationView = findViewById(R.id.nav_view_coach);
         navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, 0, 0);
+                this, drawerLayout, toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        tvWelcome = findViewById(R.id.tvWelcomeUser);
+        tvWelcome = findViewById(R.id.tvWelcomeCoach);
 
         loadUserInfo();
         setupClickListeners();
@@ -61,7 +62,7 @@ public class UserHomeActivity extends AppCompatActivity implements NavigationVie
                         if (documentSnapshot.exists()) {
                             String name = documentSnapshot.getString("name");
                             if (name != null && !name.isEmpty()) {
-                                tvWelcome.setText("Hola, " + name + "!");
+                                tvWelcome.setText("¡Hola, " + name + "!");
                             }
                         }
                     });
@@ -69,14 +70,14 @@ public class UserHomeActivity extends AppCompatActivity implements NavigationVie
     }
 
     private void setupClickListeners() {
-        findViewById(R.id.cardEvents).setOnClickListener(v ->
-                startActivity(new Intent(this, EventsActivity.class)));
+        findViewById(R.id.cardMyGroups).setOnClickListener(v ->
+                Toast.makeText(this, "Próximamente: Mis Grupos", Toast.LENGTH_SHORT).show());
 
-        findViewById(R.id.cardMyEvents).setOnClickListener(v ->
-                Toast.makeText(this, "Proximamente: Mis Eventos", Toast.LENGTH_SHORT).show());
+        findViewById(R.id.cardSchedule).setOnClickListener(v ->
+                Toast.makeText(this, "Próximamente: Mi Horario", Toast.LENGTH_SHORT).show());
 
         findViewById(R.id.cardProfile).setOnClickListener(v ->
-                Toast.makeText(this, "Proximamente: Mi Perfil", Toast.LENGTH_SHORT).show());
+                Toast.makeText(this, "Próximamente: Mi Perfil", Toast.LENGTH_SHORT).show());
 
         findViewById(R.id.cardLogout).setOnClickListener(v -> logout());
     }
@@ -85,14 +86,15 @@ public class UserHomeActivity extends AppCompatActivity implements NavigationVie
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == 0x7f0a01f1) {
-        } else if (id == 0x7f0a01f2) {
-            startActivity(new Intent(this, EventsActivity.class));
-        } else if (id == 0x7f0a01f3) {
-            Toast.makeText(this, "Proximamente", Toast.LENGTH_SHORT).show();
-        } else if (id == 0x7f0a01f4) {
-            Toast.makeText(this, "Proximamente", Toast.LENGTH_SHORT).show();
-        } else if (id == 0x7f0a01f5) {
+        if (id == R.id.nav_coach_home) {
+            // Ya estamos en home
+        } else if (id == R.id.nav_coach_my_groups) {
+            Toast.makeText(this, "Próximamente: Mis Grupos", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_coach_schedule) {
+            Toast.makeText(this, "Próximamente: Mi Horario", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_coach_profile) {
+            Toast.makeText(this, "Próximamente: Mi Perfil", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.nav_coach_logout) {
             logout();
         }
 
