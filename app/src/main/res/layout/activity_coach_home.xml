@@ -11,17 +11,20 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/gray_light">
+        android:background="@color/screen_background_color">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="0dp">
+            android:fitsSystemWindows="true"
+            app:elevation="0dp"
+            android:background="@color/green_primary">
+
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbarCoach"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/green_primary"
+                android:background="@android:color/transparent"
                 app:title="GESDEP - Entrenador"
                 app:titleTextColor="@color/white"
                 app:navigationIcon="@drawable/ic_menu"
@@ -50,7 +53,7 @@
                     <ImageView
                         android:layout_width="120dp"
                         android:layout_height="120dp"
-                        android:src="@drawable/ic_person"
+                        android:src="@drawable/ic_trophy"
                         app:tint="#33FFFFFF"
                         android:layout_gravity="end|bottom"
                         android:translationX="20dp"
@@ -63,17 +66,21 @@
                         android:padding="24dp">
 
                         <TextView
-                            android:id="@+id/tvCoachWelcome"
+                            android:id="@+id/tvWelcomeCoach"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:text="¡Hola, Entrenador!"
                             android:textSize="22sp"
                             android:textColor="@color/white"
                             android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
+                            android:layout_marginBottom="4dp" />
 
                         <TextView
-                            android:text="Gestiona tus grupos y asistencias"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Gestiona tus entrenamientos"
                             android:textSize="14sp"
-                            android:textColor="#E0E0E0"/>
+                            android:textColor="#E0E0E0" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
@@ -85,36 +92,38 @@
                     android:baselineAligned="false">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardCoachGroups"
+                        android:id="@+id/cardEvents"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
                             <ImageView
                                 style="@style/DashboardIconStyle"
-                                android:src="@drawable/ic_group"
-                                app:tint="@color/purple_participants"/>
+                                android:src="@drawable/ic_calendar"
+                                app:tint="@color/blue_button" />
                             <TextView
                                 style="@style/DashboardTextStyle"
-                                android:text="Mis\nGrupos"/>
+                                android:text="Explorar\nEventos" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardCoachAttendance"
+                        android:id="@+id/cardMyEvents"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
                             <ImageView
                                 style="@style/DashboardIconStyle"
                                 android:src="@drawable/ic_check"
-                                app:tint="@color/green_primary"/>
+                                app:tint="@color/green_primary" />
                             <TextView
                                 style="@style/DashboardTextStyle"
-                                android:text="Registrar\nAsistencia"/>
+                                android:text="Mis\nInscripciones" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
@@ -126,16 +135,17 @@
                     android:baselineAligned="false">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardCoachProfile"
+                        android:id="@+id/cardProfile"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
                             <ImageView
                                 style="@style/DashboardIconStyle"
                                 android:src="@drawable/ic_person"
-                                app:tint="@color/orange_coach" />
+                                app:tint="@color/purple_participants" />
                             <TextView
                                 style="@style/DashboardTextStyle"
                                 android:text="Mi\nPerfil" />
@@ -143,20 +153,21 @@
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardCoachLogout"
+                        android:id="@+id/cardLogout"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
                             <ImageView
                                 style="@style/DashboardIconStyle"
                                 android:src="@drawable/ic_logout"
-                                app:tint="#D32F2F" />
+                                app:tint="@color/red_error" />
                             <TextView
                                 style="@style/DashboardTextStyle"
                                 android:text="Cerrar\nSesión"
-                                android:textColor="#D32F2F"/>
+                                android:textColor="@color/red_error"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
@@ -172,10 +183,10 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        style="@style/Widget.MaterialComponents.NavigationView"
+        android:background="@color/card_surface_color"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/drawer_coach"
-        app:itemIconTint="@color/green_primary"
-        app:itemTextColor="@color/gray_dark"/>
+        app:itemIconTint="@color/icon_tint_color"
+        app:itemTextColor="@color/text_primary_color"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

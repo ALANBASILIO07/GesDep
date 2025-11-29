@@ -5,21 +5,25 @@
             android:id="@+id/nav_coach_home"
             android:icon="@drawable/ic_home"
             android:title="Inicio" />
+
         <item
-            android:id="@+id/nav_coach_my_groups"
+            android:id="@+id/nav_coach_groups"
             android:icon="@drawable/ic_group"
             android:title="Mis Grupos" />
+
         <item
             android:id="@+id/nav_coach_schedule"
             android:icon="@drawable/ic_calendar"
             android:title="Mi Horario" />
-        <item
-            android:id="@+id/nav_coach_profile"
-            android:icon="@drawable/ic_person"
-            android:title="Mi Perfil" />
     </group>
-    <item android:title="Sesión">
+
+    <item android:title="Configuración">
         <menu>
+            <item
+                android:id="@+id/nav_coach_profile"
+                android:icon="@drawable/ic_person"
+                android:title="Mi Perfil" />
+
             <item
                 android:id="@+id/nav_coach_logout"
                 android:icon="@drawable/ic_logout"

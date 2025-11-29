@@ -7,10 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -38,76 +36,37 @@
 
         <activity
             android:name=".RegisterActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".LoginActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".UserHomeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".AdminHomeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".CoachHomeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".HomeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".EventsActivity"
             android:exported="false"
-            android:label="Eventos" />
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity android:name=".UserHomeActivity" android:exported="false" />
+        <activity android:name=".AdminHomeActivity" android:exported="false" />
+        <activity android:name=".CoachHomeActivity" android:exported="false" />
+        <activity android:name=".HomeActivity" android:exported="false" />
+
+        <activity android:name=".EventsActivity" android:exported="false" android:label="Eventos" />
+        <activity android:name=".CreateEventActivity" android:exported="false" />
 
         <activity
-            android:name=".CreateEventActivity"
-            android:exported="false" />
+            android:name=".MapPickerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
-        <activity
-            android:name=".MaintenanceActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ParticipantsActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".CoachesActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".AttendanceActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ActivityDetailActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ActivitiesListActivity"
-            android:exported="false" />
-
-        <service
-            android:name=".services.MyFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
+        <activity android:name=".MaintenanceActivity" android:exported="false" />
+        <activity android:name=".ParticipantsActivity" android:exported="false" />
+        <activity android:name=".CoachesActivity" android:exported="false" />
+        <activity android:name=".AttendanceActivity" android:exported="false" />
+        <activity android:name=".ActivityDetailActivity" android:exported="false" />
+        <activity android:name=".ActivitiesListActivity" android:exported="false" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="gesdep_events_channel" />
     </application>
 
 </manifest>

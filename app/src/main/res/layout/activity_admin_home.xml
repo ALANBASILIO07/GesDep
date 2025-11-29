@@ -11,21 +11,22 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/gray_light">
+        android:background="@color/screen_background_color">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="0dp">
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/green_primary"
-                app:title="GESDEP - Organizador"
-                app:titleTextColor="@color/white"
-                app:navigationIcon="@drawable/ic_menu"
-                app:navigationIconTint="@color/white"/>
+            android:fitsSystemWindows="true"
+            app:elevation="0dp"
+            android:background="@color/green_primary"> <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
+            app:title="GESDEP - Organizador"
+            app:titleTextColor="@color/white"
+            app:navigationIcon="@drawable/ic_menu"
+            app:navigationIconTint="@color/white"/>
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.core.widget.NestedScrollView
@@ -64,6 +65,8 @@
 
                         <TextView
                             android:id="@+id/tvWelcome"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:text="¡Hola, Organizador!"
                             android:textSize="22sp"
                             android:textColor="@color/white"
@@ -71,6 +74,8 @@
                             android:layout_marginBottom="4dp"/>
 
                         <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
                             android:text="Panel de administración de eventos"
                             android:textSize="14sp"
                             android:textColor="#E0E0E0"/>
@@ -88,6 +93,7 @@
                         android:id="@+id/cardEvents"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
@@ -105,6 +111,7 @@
                         android:id="@+id/cardCreateEvent"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
@@ -130,6 +137,7 @@
                         android:id="@+id/cardMyEvents"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
@@ -147,6 +155,7 @@
                         android:id="@+id/cardParticipants"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
@@ -172,6 +181,7 @@
                         android:id="@+id/cardCoaches"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
@@ -189,6 +199,7 @@
                         android:id="@+id/cardReports"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
@@ -213,13 +224,14 @@
                         android:id="@+id/cardSettings"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
                             <ImageView
                                 style="@style/DashboardIconStyle"
                                 android:src="@drawable/ic_settings"
-                                app:tint="@color/gray_dark" />
+                                app:tint="@color/text_primary_color" />
                             <TextView
                                 style="@style/DashboardTextStyle"
                                 android:text="Ajustes\nGenerales" />
@@ -230,17 +242,18 @@
                         android:id="@+id/cardLogout"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
                             <ImageView
                                 style="@style/DashboardIconStyle"
                                 android:src="@drawable/ic_logout"
-                                app:tint="#D32F2F" />
+                                app:tint="@color/red_error" />
                             <TextView
                                 style="@style/DashboardTextStyle"
                                 android:text="Cerrar\nSesión"
-                                android:textColor="#D32F2F"/>
+                                android:textColor="@color/red_error"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
@@ -256,9 +269,10 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        android:background="@color/card_surface_color"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/drawer_admin"
-        app:itemIconTint="@color/green_primary"
-        app:itemTextColor="@color/gray_dark"/>
+        app:itemIconTint="@color/icon_tint_color"
+        app:itemTextColor="@color/text_primary_color"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>

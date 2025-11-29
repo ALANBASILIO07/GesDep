@@ -5,94 +5,95 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_light">
+    android:background="@color/screen_background_color"> <com.google.android.material.appbar.AppBarLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fitsSystemWindows="true"
+    android:background="@color/green_primary"
+    app:elevation="0dp">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@android:color/transparent"
+        app:title="Eventos Disponibles"
+        app:titleTextColor="@color/white"
+        app:navigationIcon="@drawable/ic_arrow_black"
+        app:navigationIconTint="@color/white"/>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/green_primary"
-        app:elevation="0dp">
+        android:orientation="vertical"
+        android:background="@color/card_surface_color"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="16dp">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="Eventos Disponibles"
-            app:titleTextColor="@color/white"
-            app:navigationIcon="@drawable/abc_ic_ab_back_material"
-            app:navigationIconTint="@color/white"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filtrar por categoría:"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_secondary_color"
+            android:layout_marginBottom="8dp"/>
 
-        <LinearLayout
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/white"
-            android:paddingVertical="8dp"
-            android:paddingHorizontal="16dp">
+            android:scrollbars="none">
 
-            <TextView
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Filtrar por categoría:"
-                android:textSize="12sp"
-                android:textColor="@color/gray_text"
-                android:layout_marginBottom="4dp"/>
+                app:singleSelection="true"
+                app:selectionRequired="true">
 
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none">
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroup"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipAll"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:singleSelection="true"
-                    app:selectionRequired="true">
+                    android:text="Todos"
+                    android:checked="true"
+                    android:textColor="@color/text_primary_color"
+                    app:chipBackgroundColor="@color/screen_background_color" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipAll"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Todos"
-                        android:checked="true"
-                        android:textColor="@color/black"
-                        app:chipBackgroundColor="@color/gray_light" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSports"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Deportivos"
+                    app:chipIcon="@drawable/ic_sports"
+                    android:textColor="@color/text_primary_color"
+                    app:chipBackgroundColor="@color/screen_background_color" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipSports"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Deportivos"
-                        app:chipIcon="@drawable/ic_sports"
-                        android:textColor="@color/black"
-                        app:chipBackgroundColor="@color/gray_light" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipCultural"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Culturales"
+                    app:chipIcon="@drawable/ic_group"
+                    android:textColor="@color/text_primary_color"
+                    app:chipBackgroundColor="@color/screen_background_color" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipCultural"
-                        style="@style/Widget.MaterialComponents.Chip.Choice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Culturales"
-                        app:chipIcon="@drawable/ic_group"
-                        android:textColor="@color/black"
-                        app:chipBackgroundColor="@color/gray_light" />
-
-                </com.google.android.material.chip.ChipGroup>
-            </HorizontalScrollView>
-        </LinearLayout>
-    </com.google.android.material.appbar.AppBarLayout>
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+    </LinearLayout>
+</com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:padding="16dp"
+        android:padding="8dp"
         android:clipToPadding="false"
-        tools:listitem="@layout/support_simple_spinner_dropdown_item"/>
+        tools:listitem="@layout/item_event"/>
 
     <LinearLayout
         android:id="@+id/emptyState"
@@ -108,7 +109,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:src="@drawable/ic_calendar"
-            app:tint="@color/gray_text"
+            app:tint="@color/text_secondary_color"
             android:alpha="0.5"
             android:layout_marginBottom="16dp"/>
 
@@ -118,7 +119,7 @@
             android:text="No hay eventos disponibles"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/green_dark"
+            android:textColor="@color/green_primary"
             android:layout_marginBottom="8dp"
             android:textAlignment="center"/>
 
@@ -127,19 +128,9 @@
             android:layout_height="wrap_content"
             android:text="Parece que no hay actividades programadas para esta categoría por el momento."
             android:textSize="14sp"
-            android:textColor="@color/gray_text"
+            android:textColor="@color/text_secondary_color"
             android:textAlignment="center"
             android:lineSpacingExtra="4dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnRefresh"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Actualizar"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:textColor="@color/green_primary"
-            android:layout_marginTop="16dp"/>
-
     </LinearLayout>
 
     <ProgressBar
@@ -149,5 +140,17 @@
         android:layout_gravity="center"
         android:indeterminateTint="@color/green_primary"
         android:visibility="gone" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddEvent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:src="@drawable/ic_add"
+        app:tint="@color/white"
+        app:backgroundTint="@color/blue_button"
+        android:contentDescription="Crear Evento"
+        app:elevation="6dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

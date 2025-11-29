@@ -21,7 +21,13 @@
             android:id="@+id/nav_admin_coaches"
             android:icon="@drawable/ic_person"
             android:title="Entrenadores" />
+
+        <item
+            android:id="@+id/nav_admin_reports"
+            android:icon="@drawable/ic_tools"
+            android:title="Reportes y Mantenimiento" />
     </group>
+
     <item android:title="Configuración">
         <menu>
             <item

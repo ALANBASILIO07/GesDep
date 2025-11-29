@@ -1,5 +1,6 @@
 package com.uaemex.gesdep;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -12,9 +13,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.uaemex.gesdep.adapters.EventsAdapter;
 import com.uaemex.gesdep.models.EventModel;
 import com.uaemex.gesdep.repositories.EventRepository;
+import com.uaemex.gesdep.utils.WindowUtils;
 
 import java.util.List;
 
@@ -29,19 +35,34 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private View emptyState;
+    private FloatingActionButton fabAddEvent; // Nuevo botón
 
     private EventsAdapter adapter;
     private EventRepository repository;
+
+    // Firebase para validar rol
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_events);
 
+        // 1. Estética: Barra Verde
+        WindowUtils.setGreenStatusBar(this);
+
+        // Inicializar Firebase
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance("gesdep");
+
         initViews();
         setupToolbar();
         setupRecyclerView();
         setupFilters();
+
+        // 2. Lógica de Rol (Mostrar/Ocultar botón Crear)
+        checkUserRole();
 
         repository = new EventRepository();
         loadAllEvents();
@@ -56,6 +77,7 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
         recyclerView = findViewById(R.id.recyclerView);
         progressBar = findViewById(R.id.progressBar);
         emptyState = findViewById(R.id.emptyState);
+        fabAddEvent = findViewById(R.id.fabAddEvent); // Vincular el botón
     }
 
     private void setupToolbar() {
@@ -66,6 +88,34 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
         }
 
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
+    }
+
+    /**
+     * Verifica si el usuario es ADMIN para mostrar el botón de crear evento.
+     */
+    private void checkUserRole() {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+            db.collection("users").document(user.getUid()).get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc.exists()) {
+                            String role = doc.getString("role");
+                            // Solo si es ADMIN mostramos el botón
+                            if ("admin".equals(role)) {
+                                fabAddEvent.setVisibility(View.VISIBLE);
+                                fabAddEvent.setOnClickListener(v -> {
+                                    // Ir al formulario de creación
+                                    startActivity(new Intent(EventsActivity.this, CreateEventActivity.class));
+                                });
+                            } else {
+                                fabAddEvent.setVisibility(View.GONE);
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> fabAddEvent.setVisibility(View.GONE));
+        } else {
+            fabAddEvent.setVisibility(View.GONE);
+        }
     }
 
     private void setupRecyclerView() {
@@ -83,9 +133,9 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
             if (checkedId == R.id.chipAll) {
                 loadAllEvents();
             } else if (checkedId == R.id.chipSports) {
-                loadEventsByType("deportivo");
+                loadEventsByType("Deportivo"); // Ajustado a Mayúscula según tu modelo
             } else if (checkedId == R.id.chipCultural) {
-                loadEventsByType("cultural");
+                loadEventsByType("Cultural");
             }
         });
     }
@@ -109,17 +159,17 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
             @Override
             public void onError(String error) {
                 showLoading(false);
-                showEmptyState(true);
-                Toast.makeText(EventsActivity.this,
-                        "Error: " + error, Toast.LENGTH_SHORT).show();
+                // Si hay error, mostramos empty state por ahora
+                if (adapter.getItemCount() == 0) showEmptyState(true);
+                Toast.makeText(EventsActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void loadEventsByType(String type) {
+    private void loadEventsByType(String category) {
         showLoading(true);
 
-        repository.getEventsByType(type, new EventRepository.OnEventsLoadedListener() {
+        repository.getEventsByType(category, new EventRepository.OnEventsLoadedListener() {
             @Override
             public void onEventsLoaded(List<EventModel> events) {
                 showLoading(false);
@@ -135,9 +185,8 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
             @Override
             public void onError(String error) {
                 showLoading(false);
-                showEmptyState(true);
-                Toast.makeText(EventsActivity.this,
-                        "Error: " + error, Toast.LENGTH_SHORT).show();
+                if (adapter.getItemCount() == 0) showEmptyState(true);
+                Toast.makeText(EventsActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -145,6 +194,7 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
     private void showLoading(boolean show) {
         progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
+        emptyState.setVisibility(View.GONE); // Asegurar que se oculte
     }
 
     private void showEmptyState(boolean show) {
@@ -154,12 +204,18 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
 
     @Override
     public void onEventClick(EventModel event) {
-        // Por ahora solo mostramos un Toast
-        // En la siguiente fase crearemos EventDetailActivity
-        Toast.makeText(this,
-                "Evento: " + event.name + "\n" +
-                        "Fecha: " + event.eventDateTime.toDate().toString() + "\n" +
-                        "Lugar: " + event.placeName,
-                Toast.LENGTH_LONG).show();
+        // Actualizado para usar los nuevos Getters del EventModel
+        String msg = "Evento: " + event.getTitle();
+        if (event.getEventDateTime() != null) {
+            msg += "\nFecha: " + event.getEventDateTime().toDate().toString();
+        }
+        msg += "\nLugar: " + event.getPlaceName();
+
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+
+        // TODO: Aquí abriremos ActivityDetail en el futuro
+        // Intent intent = new Intent(this, ActivityDetailActivity.class);
+        // intent.putExtra("event", event); // EventModel es Serializable
+        // startActivity(intent);
     }
 }

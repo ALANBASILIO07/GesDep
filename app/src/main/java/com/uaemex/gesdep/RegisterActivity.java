@@ -1,36 +1,74 @@
 package com.uaemex.gesdep;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
+import android.widget.ScrollView; // IMPORTANTE
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText etFullName, etEmail, etPassword, etConfirmPassword, etOrganizationCode;
+    private EditText etName, etEmail, etPassword, etConfirmPassword, etOrgCode;
     private RadioGroup rgUserType;
     private Button btnRegister;
     private ProgressBar progressBar;
-    private View organizationCodeLayout;
+    private View tilOrgCode;
+    private ImageButton btnBack;
+    private TextView tvGoToLogin;
+
+    private ImageView ivRegisterProfile;
+    private CardView btnPickPhoto;
+    private ScrollView registerScrollView; // ScrollView para UX
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+    private StorageReference storageRef;
 
-    // Código de validación para organizadores (puedes cambiarlo)
-    private static final String ORGANIZATION_CODE = "IMCUFIDE2025";
+    private Uri selectedImageUri = null;
+
+    private static final String CODE_ORGANIZER = "ADMIN2025";
+    private static final String CODE_COACH = "ENTRENADOR2025";
+
+    private final ActivityResultLauncher<Intent> galleryLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    selectedImageUri = result.getData().getData();
+                    Glide.with(this)
+                            .load(selectedImageUri)
+                            .apply(RequestOptions.circleCropTransform())
+                            .into(ivRegisterProfile);
+                    ivRegisterProfile.setColorFilter(null);
+                    ivRegisterProfile.setPadding(0, 0, 0, 0);
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,187 +76,195 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         auth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance("gesdep");
+        storageRef = FirebaseStorage.getInstance().getReference("profile_images");
 
         initViews();
         setupListeners();
     }
 
     private void initViews() {
-        etFullName = findViewById(R.id.etFullName);
+        etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
-        etOrganizationCode = findViewById(R.id.etOrganizationCode);
+        etOrgCode = findViewById(R.id.etOrgCode);
         rgUserType = findViewById(R.id.rgUserType);
         btnRegister = findViewById(R.id.btnRegister);
         progressBar = findViewById(R.id.progressBar);
-        organizationCodeLayout = findViewById(R.id.organizationCodeLayout);
+        tilOrgCode = findViewById(R.id.tilOrgCode);
+        btnBack = findViewById(R.id.btnBack);
+        tvGoToLogin = findViewById(R.id.tvGoToLogin);
+        ivRegisterProfile = findViewById(R.id.ivRegisterProfile);
+        btnPickPhoto = findViewById(R.id.btnPickPhoto);
+
+        // Nuevo: Vincular el ScrollView
+        registerScrollView = findViewById(R.id.registerScrollView);
+
+        tilOrgCode.setVisibility(View.GONE);
     }
 
     private void setupListeners() {
-        findViewById(R.id.tvLogin).setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(RegisterActivity.this, WelcomeActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(intent);
+            finish();
+        });
+
+        tvGoToLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        View.OnClickListener pickPhotoListener = v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            galleryLauncher.launch(intent);
+        };
+        btnPickPhoto.setOnClickListener(pickPhotoListener);
+        ivRegisterProfile.setOnClickListener(pickPhotoListener);
+
         rgUserType.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.rbOrganizer || checkedId == R.id.rbCoach) {
-                organizationCodeLayout.setVisibility(View.VISIBLE);
+                tilOrgCode.setVisibility(View.VISIBLE);
+                etOrgCode.setHint(checkedId == R.id.rbOrganizer ? "Código de Organizador" : "Código de Entrenador");
+
+                // UX: Si aparece el campo, intentar hacer scroll hacia él
+                registerScrollView.post(() -> registerScrollView.smoothScrollTo(0, tilOrgCode.getBottom()));
             } else {
-                organizationCodeLayout.setVisibility(View.GONE);
-                etOrganizationCode.setText("");
+                tilOrgCode.setVisibility(View.GONE);
+                etOrgCode.setText("");
             }
         });
+
+        // --- UX: SCROLL AUTOMÁTICO AL ENFOCAR CAMPO ---
+        View.OnFocusChangeListener focusListener = (view, hasFocus) -> {
+            if (hasFocus) {
+                View parent = (View) view.getParent().getParent();
+                scrollToView(parent);
+            }
+        };
+
+        etName.setOnFocusChangeListener(focusListener);
+        etEmail.setOnFocusChangeListener(focusListener);
+        etPassword.setOnFocusChangeListener(focusListener);
+        etConfirmPassword.setOnFocusChangeListener(focusListener);
+        etOrgCode.setOnFocusChangeListener(focusListener);
+        // ------------------------------------------------
 
         btnRegister.setOnClickListener(v -> validateAndRegister());
     }
 
+    // UX: Método para desplazar la pantalla
+    private void scrollToView(final View view) {
+        registerScrollView.postDelayed(() -> {
+            int y = view.getTop();
+            registerScrollView.smoothScrollTo(0, y);
+        }, 200); // Pequeño delay para dar tiempo al teclado de abrir
+    }
+
     private void validateAndRegister() {
-        String fullName = etFullName.getText().toString().trim();
+        String fullName = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
         String confirmPassword = etConfirmPassword.getText().toString().trim();
-        String orgCode = etOrganizationCode.getText().toString().trim();
+        String orgCode = etOrgCode.getText().toString().trim();
 
-        // Validaciones
-        if (fullName.isEmpty()) {
-            etFullName.setError("Ingrese su nombre completo");
-            etFullName.requestFocus();
-            return;
-        }
+        if (fullName.isEmpty()) { etName.setError("Requerido"); return; }
+        if (email.isEmpty()) { etEmail.setError("Requerido"); return; }
+        if (password.isEmpty() || password.length() < 6) { etPassword.setError("Mínimo 6 caracteres"); return; }
+        if (!password.equals(confirmPassword)) { etConfirmPassword.setError("No coinciden"); return; }
 
-        if (email.isEmpty()) {
-            etEmail.setError("Ingrese su email");
-            etEmail.requestFocus();
-            return;
-        }
-
-        if (password.isEmpty()) {
-            etPassword.setError("Ingrese una contraseña");
-            etPassword.requestFocus();
-            return;
-        }
-
-        if (password.length() < 6) {
-            etPassword.setError("La contraseña debe tener al menos 6 caracteres");
-            etPassword.requestFocus();
-            return;
-        }
-
-        if (!password.equals(confirmPassword)) {
-            etConfirmPassword.setError("Las contraseñas no coinciden");
-            etConfirmPassword.requestFocus();
-            return;
-        }
-
-        // Determinar tipo de usuario
         int selectedRole = rgUserType.getCheckedRadioButtonId();
-        String userRole;
-
+        String userRole = "user";
 
         if (selectedRole == R.id.rbOrganizer) {
-            if (!orgCode.equals(ORGANIZATION_CODE)) {
-                etOrganizationCode.setError("Código inválido");
-                etOrganizationCode.requestFocus();
-                Toast.makeText(this, "Código inválido", Toast.LENGTH_LONG).show();
-                return;
+            if (!orgCode.equals(CODE_ORGANIZER)) {
+                etOrgCode.setError("Código incorrecto"); return;
             }
             userRole = "admin";
         } else if (selectedRole == R.id.rbCoach) {
-            if (!orgCode.equals(ORGANIZATION_CODE)) {
-                etOrganizationCode.setError("Código inválido");
-                etOrganizationCode.requestFocus();
-                Toast.makeText(this, "Código inválido", Toast.LENGTH_LONG).show();
-                return;
+            if (!orgCode.equals(CODE_COACH)) {
+                etOrgCode.setError("Código incorrecto"); return;
             }
             userRole = "coach";
-        } else {
-            userRole = "user";
         }
 
-
-
-
-
-
-
-
-
-
-
-
-        // Registrar usuario
-        registerUser(fullName, email, password, userRole);
+        registerInAuth(fullName, email, password, userRole);
     }
 
-    private void registerUser(String fullName, String email, String password, String role) {
+    private void registerInAuth(String name, String email, String password, String role) {
         progressBar.setVisibility(View.VISIBLE);
         btnRegister.setEnabled(false);
 
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener(authResult -> {
-                    FirebaseUser firebaseUser = authResult.getUser();
-                    if (firebaseUser != null) {
-                        // Crear documento de usuario en Firestore
-                        Map<String, Object> user = new HashMap<>();
-                        user.put("uid", firebaseUser.getUid());
-                        user.put("name", fullName);
-                        user.put("email", email);
-                        user.put("role", role);
-                        user.put("createdAt", System.currentTimeMillis());
-                        user.put("eventsOrganized", 0);
-                        user.put("eventsParticipated", 0);
-                        user.put("active", true);
-
-                        db.collection("users")
-                                .document(firebaseUser.getUid())
-                                .set(user)
-                                .addOnSuccessListener(aVoid -> {
-                                    progressBar.setVisibility(View.GONE);
-                                    Toast.makeText(this, 
-                                        "Cuenta creada exitosamente", 
-                                        Toast.LENGTH_SHORT).show();
-                                    
-                                    // Redirigir según el rol
-                                    redirectToHome(role);
-                                })
-                                .addOnFailureListener(e -> {
-                                    progressBar.setVisibility(View.GONE);
-                                    btnRegister.setEnabled(true);
-                                    Toast.makeText(this, 
-                                        "Error al guardar datos: " + e.getMessage(), 
-                                        Toast.LENGTH_SHORT).show();
-                                });
+                    FirebaseUser user = authResult.getUser();
+                    if (user != null) {
+                        if (selectedImageUri != null) {
+                            uploadImageAndSaveData(user.getUid(), name, email, role);
+                        } else {
+                            saveUserToFirestore(user.getUid(), name, email, role, null);
+                        }
                     }
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
                     btnRegister.setEnabled(true);
-                    
-                    String errorMessage = "Error al crear cuenta";
-                    if (e.getMessage() != null) {
-                        if (e.getMessage().contains("already in use")) {
-                            errorMessage = "Este email ya está registrado";
-                        } else if (e.getMessage().contains("invalid email")) {
-                            errorMessage = "Email inválido";
-                        } else if (e.getMessage().contains("weak password")) {
-                            errorMessage = "Contraseña muy débil";
-                        }
-                    }
-                    
-                    Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
-    private void redirectToHome(String role) {
-        Intent intent;
-        if (role.equals("admin")) {
-            intent = new Intent(this, AdminHomeActivity.class);
-        } else if (role.equals("coach")) {
-            intent = new Intent(this, CoachHomeActivity.class);
-        } else {
-            intent = new Intent(this, UserHomeActivity.class);
-        }
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+    private void uploadImageAndSaveData(String uid, String name, String email, String role) {
+        StorageReference fileRef = storageRef.child(uid + ".jpg");
+
+        fileRef.putFile(selectedImageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        saveUserToFirestore(uid, name, email, role, uri.toString());
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error al subir imagen", Toast.LENGTH_SHORT).show();
+                    saveUserToFirestore(uid, name, email, role, null);
+                });
     }
-}
+
+    private void saveUserToFirestore(String uid, String name, String email, String role, String photoUrl) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("uid", uid);
+        user.put("name", name);
+        user.put("email", email);
+        user.put("role", role);
+        user.put("createdAt", System.currentTimeMillis());
+        user.put("active", true);
+
+        if (photoUrl != null) {
+            user.put("photoUrl", photoUrl);
+        }
+
+        if (role.equals("admin")) {
+            user.put("eventsOrganized", 0);
+        } else {
+            user.put("eventsParticipated", 0);
+        }
+
+        db.collection("users").document(uid).set(user)
+                .addOnSuccessListener(aVoid -> {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(this, "Cuenta creada exitosamente", Toast.LENGTH_LONG).show();
+                    auth.signOut();
+
+                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    progressBar.setVisibility(View.GONE);
+                    btnRegister.setEnabled(true);
+                    Toast.makeText(this, "Error guardando datos", Toast.LENGTH_SHORT).show();
+                });
+    }
 }

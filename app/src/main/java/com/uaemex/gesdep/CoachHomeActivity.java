@@ -3,6 +3,8 @@ package com.uaemex.gesdep;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,11 +14,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.uaemex.gesdep.utils.WindowUtils;
 
 public class CoachHomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -30,8 +35,10 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_coach_home);
 
+        WindowUtils.setGreenStatusBar(this);
+
         auth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance("gesdep");
 
         MaterialToolbar toolbar = findViewById(R.id.toolbarCoach);
         setSupportActionBar(toolbar);
@@ -49,7 +56,41 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
         tvWelcome = findViewById(R.id.tvWelcomeCoach);
 
         loadUserInfo();
+        updateNavHeader(navigationView);
         setupClickListeners();
+    }
+
+    private void updateNavHeader(NavigationView navigationView) {
+        View headerView = navigationView.getHeaderView(0);
+        TextView navName = headerView.findViewById(R.id.navHeaderName);
+        TextView navEmail = headerView.findViewById(R.id.navHeaderEmail);
+        ImageView navImage = headerView.findViewById(R.id.imgProfile);
+
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+            navEmail.setText(user.getEmail());
+            db.collection("users").document(user.getUid()).get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc.exists()) {
+                            String name = doc.getString("name");
+                            if (name != null) navName.setText(name);
+
+                            String photoUrl = doc.getString("photoUrl");
+                            if (photoUrl != null && !photoUrl.isEmpty()) {
+                                Glide.with(this)
+                                        .load(photoUrl)
+                                        .apply(RequestOptions.circleCropTransform())
+                                        .into(navImage);
+                                navImage.setPadding(0,0,0,0);
+                                navImage.setColorFilter(null);
+                            } else {
+                                navImage.setImageResource(R.drawable.ic_trophy);
+                                navImage.setPadding(30,30,30,30);
+                                navImage.setColorFilter(getResources().getColor(R.color.white));
+                            }
+                        }
+                    });
+        }
     }
 
     private void loadUserInfo() {
@@ -70,15 +111,12 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
     }
 
     private void setupClickListeners() {
-        findViewById(R.id.cardMyGroups).setOnClickListener(v ->
+        findViewById(R.id.cardEvents).setOnClickListener(v ->
                 Toast.makeText(this, "Próximamente: Mis Grupos", Toast.LENGTH_SHORT).show());
-
-        findViewById(R.id.cardSchedule).setOnClickListener(v ->
+        findViewById(R.id.cardMyEvents).setOnClickListener(v ->
                 Toast.makeText(this, "Próximamente: Mi Horario", Toast.LENGTH_SHORT).show());
-
         findViewById(R.id.cardProfile).setOnClickListener(v ->
                 Toast.makeText(this, "Próximamente: Mi Perfil", Toast.LENGTH_SHORT).show());
-
         findViewById(R.id.cardLogout).setOnClickListener(v -> logout());
     }
 
@@ -86,17 +124,11 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_coach_home) {
-            // Ya estamos en home
-        } else if (id == R.id.nav_coach_my_groups) {
-            Toast.makeText(this, "Próximamente: Mis Grupos", Toast.LENGTH_SHORT).show();
-        } else if (id == R.id.nav_coach_schedule) {
-            Toast.makeText(this, "Próximamente: Mi Horario", Toast.LENGTH_SHORT).show();
-        } else if (id == R.id.nav_coach_profile) {
-            Toast.makeText(this, "Próximamente: Mi Perfil", Toast.LENGTH_SHORT).show();
-        } else if (id == R.id.nav_coach_logout) {
-            logout();
-        }
+        if (id == R.id.nav_coach_home) { }
+        else if (id == R.id.nav_coach_groups) Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show();
+        else if (id == R.id.nav_coach_schedule) Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show();
+        else if (id == R.id.nav_coach_profile) Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show();
+        else if (id == R.id.nav_coach_logout) logout();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

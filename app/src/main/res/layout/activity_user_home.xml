@@ -11,17 +11,20 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/gray_light">
+        android:background="@color/screen_background_color">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="0dp">
+            android:fitsSystemWindows="true"
+            app:elevation="0dp"
+            android:background="@color/green_primary">
+
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbarUser"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/green_primary"
+                android:background="@android:color/transparent"
                 app:title="GESDEP - Participante"
                 app:titleTextColor="@color/white"
                 app:navigationIcon="@drawable/ic_menu"
@@ -92,6 +95,7 @@
                         android:id="@+id/cardEvents"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
@@ -109,6 +113,7 @@
                         android:id="@+id/cardMyEvents"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
@@ -133,6 +138,7 @@
                         android:id="@+id/cardProfile"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
@@ -150,17 +156,18 @@
                         android:id="@+id/cardLogout"
                         style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp">
                         <LinearLayout style="@style/DashboardContainerStyle">
                             <ImageView
                                 style="@style/DashboardIconStyle"
                                 android:src="@drawable/ic_logout"
-                                app:tint="#D32F2F" />
+                                app:tint="@color/red_error" />
                             <TextView
                                 style="@style/DashboardTextStyle"
                                 android:text="Cerrar\nSesión"
-                                android:textColor="#D32F2F"/>
+                                android:textColor="@color/red_error"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
@@ -176,9 +183,10 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        android:background="@color/card_surface_color"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/drawer_user"
-        app:itemIconTint="@color/green_primary"
-        app:itemTextColor="@color/gray_dark"/>
+        app:itemIconTint="@color/icon_tint_color"
+        app:itemTextColor="@color/text_primary_color"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>
