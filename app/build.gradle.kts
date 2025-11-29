@@ -13,6 +13,9 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
+        // Configuración recomendada para las pruebas
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
@@ -22,22 +25,14 @@ android {
     // FIX DEFINITIVO 16 KB PAGE SIZE (Android 15+)
     packaging {
         jniLibs {
-            // Esto fuerza alineación de 16 KB en todas las librerías nativas (.so)
             useLegacyPackaging = false
         }
-        // Si después del rebuild sigue apareciendo el warning, descomenta la siguiente línea:
-        // exclude("**/libimage_processing_util_jni.so")
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
-    // Si más adelante usas Kotlin con código nativo (C/C++), agrega esto:
-    // externalNativeBuild {
-    //     cmake { version = "3.22.1" }
-    // }
 }
 
 dependencies {
@@ -70,7 +65,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
-    // CameraX → versión con soporte 16 KB nativo (la más estable al día de hoy)
+    // CameraX
     val cameraxVersion = "1.4.0"
     implementation("androidx.camera:camera-core:$cameraxVersion")
     implementation("androidx.camera:camera-camera2:$cameraxVersion")
@@ -87,4 +82,10 @@ dependencies {
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel:2.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
+
+    // --- TESTING (ESTO ES LO QUE FALTABA) ---
+    // Estas dependencias solucionan el error "package org.junit does not exist"
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
