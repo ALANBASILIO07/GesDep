@@ -5,52 +5,54 @@ import com.google.firebase.firestore.Exclude;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Modelo de Evento Deportivo/Cultural
- * Sistema de gestión de eventos para IMCUFIDE
- * Actualizado para soportar Macro Eventos, Modalidades y Disciplinas.
+ * Actualizado con lógica de Tiempos (Inicio/Fin) y Status Dinámico.
  */
 public class EventModel implements Serializable {
 
     // Identificación
     private String id;
-    private String title;           // Antes 'name'. Título del evento.
+    private String title;
     private String description;
-    private String macroEvent;      // NUEVO: Ej: "Juegos Universitarios 2025" (Opcional)
+    private String macroEvent;
 
     // Clasificación
-    private String category;        // "Deportivo", "Cultural", "Académico", "Social"
-    private String discipline;      // NUEVO: "Fútbol", "Ajedrez", "Danza", "Conferencia", etc.
-    private String modality;        // NUEVO: "Torneo", "Amistoso", "Liga", "Clase", "Presentación"
+    private String category;
+    private String discipline;
+    private String modality;
 
-    // Ubicación y Logística
-    private String placeName;       // Nombre del lugar (ej: "Cancha 1")
-    private String address;         // Dirección legible
-    private double latitude;        // Coordenada GPS
-    private double longitude;       // Coordenada GPS
+    // Ubicación
+    private String placeName;
+    private String address;
+    private double latitude;
+    private double longitude;
 
-    // Fecha y Hora
-    private Timestamp eventDateTime;
-    private Timestamp registrationDeadline; // Fecha límite para inscribirse
-    private int durationMinutes;
+    // --- TIEMPOS Y LOGÍSTICA ---
+    private Timestamp eventDateTime;      // (Legacy/Backup) Fecha de inicio general
+    private Timestamp startTime;          // Hora exacta de inicio
+    private Timestamp endTime;            // Hora exacta de fin
+    private Timestamp registrationDeadline; // Límite para inscribirse
+    private int durationMinutes;          // (Opcional) Calculado
 
-    // Registro y Cupos
-    private int minQuota;           // Mínimo para que el evento no se cancele
-    private int maxQuota;           // Capacidad máxima
+    // Cupos
+    private int minQuota;
+    private int maxQuota;
     private int currentParticipants;
 
-    // Estado y Control
-    private String status;          // "ACTIVO", "CANCELADO", "FINALIZADO", "LLENO"
-    private String organizerId;     // UID del creador
+    // Control
+    private String status; // "ACTIVO", "CANCELADO" (El estado de tiempo se calcula al vuelo)
+    private String organizerId;
     private String organizerName;
     private Timestamp createdAt;
 
     // Multimedia
-    private List<String> imageUrls; // Galería de hasta 5 fotos (la 0 es el banner)
+    private List<String> imageUrls;
 
-    // Constructor vacío requerido por Firestore
+    // Constructor vacío (Requerido por Firebase)
     public EventModel() {
         this.imageUrls = new ArrayList<>();
         this.status = "ACTIVO";
@@ -58,7 +60,7 @@ public class EventModel implements Serializable {
         this.createdAt = Timestamp.now();
     }
 
-    // --- GETTERS Y SETTERS (Necesarios para Firebase) ---
+    // --- GETTERS Y SETTERS ---
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -93,8 +95,15 @@ public class EventModel implements Serializable {
     public double getLongitude() { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
 
+    // Tiempos
     public Timestamp getEventDateTime() { return eventDateTime; }
     public void setEventDateTime(Timestamp eventDateTime) { this.eventDateTime = eventDateTime; }
+
+    public Timestamp getStartTime() { return startTime; }
+    public void setStartTime(Timestamp startTime) { this.startTime = startTime; }
+
+    public Timestamp getEndTime() { return endTime; }
+    public void setEndTime(Timestamp endTime) { this.endTime = endTime; }
 
     public Timestamp getRegistrationDeadline() { return registrationDeadline; }
     public void setRegistrationDeadline(Timestamp registrationDeadline) { this.registrationDeadline = registrationDeadline; }
@@ -102,6 +111,7 @@ public class EventModel implements Serializable {
     public int getDurationMinutes() { return durationMinutes; }
     public void setDurationMinutes(int durationMinutes) { this.durationMinutes = durationMinutes; }
 
+    // Cupos
     public int getMinQuota() { return minQuota; }
     public void setMinQuota(int minQuota) { this.minQuota = minQuota; }
 
@@ -126,52 +136,40 @@ public class EventModel implements Serializable {
     public List<String> getImageUrls() { return imageUrls; }
     public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
 
-    // --- MÉTODOS DE UTILIDAD ---
+    // --- MÉTODOS DE LÓGICA (Calculados) ---
 
     /**
-     * Calcula los espacios disponibles restantes.
+     * Determina el estado temporal del evento:
+     * - PENDIENTE: Aún no empieza.
+     * - EN VIVO: Está ocurriendo ahora mismo.
+     * - FINALIZADO: Ya terminó la hora de fin.
      */
-    @Exclude // Excluir para que no se guarde como campo en BD, se calcula al vuelo
+    @Exclude
+    public String getTimeStatus() {
+        if ("CANCELADO".equals(status)) return "CANCELADO";
+
+        if (startTime == null || endTime == null) return "PENDIENTE";
+
+        long now = new Date().getTime();
+        long startMillis = startTime.toDate().getTime();
+        long endMillis = endTime.toDate().getTime();
+
+        if (now < startMillis) {
+            return "PENDIENTE";
+        } else if (now >= startMillis && now <= endMillis) {
+            return "EN VIVO";
+        } else {
+            return "FINALIZADO";
+        }
+    }
+
+    @Exclude
     public int getAvailableSpots() {
         return maxQuota - currentParticipants;
     }
 
-    /**
-     * Verifica si el evento ha alcanzado el mínimo requerido.
-     */
-    @Exclude
-    public boolean isMinimumMet() {
-        return currentParticipants >= minQuota;
-    }
-
-    /**
-     * Verifica si el evento está lleno.
-     */
     @Exclude
     public boolean isFull() {
         return currentParticipants >= maxQuota;
-    }
-
-    /**
-     * Valida si el mínimo de participantes es congruente con la modalidad.
-     * (Ej: Un torneo no puede ser de 1 persona).
-     * @return true si es válido, false si hay error de lógica.
-     */
-    @Exclude
-    public boolean validateModalityConstraints() {
-        if (modality == null) return true; // Si no hay modalidad, asumimos válido
-
-        switch (modality.toLowerCase()) {
-            case "torneo":
-                return minQuota >= 4; // Mínimo 4 para un torneo
-            case "amistoso":
-            case "liga":
-                return minQuota >= 2; // Mínimo 2 para competir
-            case "clase":
-            case "presentación":
-                return minQuota >= 1; // Al menos 1 interesado
-            default:
-                return true;
-        }
     }
 }

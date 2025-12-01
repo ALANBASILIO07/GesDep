@@ -47,21 +47,31 @@
         <activity android:name=".UserHomeActivity" android:exported="false" />
         <activity android:name=".AdminHomeActivity" android:exported="false" />
         <activity android:name=".CoachHomeActivity" android:exported="false" />
-        <activity android:name=".HomeActivity" android:exported="false" />
-
         <activity android:name=".EventsActivity" android:exported="false" android:label="Eventos" />
-        <activity android:name=".CreateEventActivity" android:exported="false" />
+        <activity
+            android:name=".CreateEventActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity android:name=".ActivityDetailActivity" android:exported="false" />
+
+        <activity android:name=".ManageVenuesActivity" android:exported="false" />
+        <activity
+            android:name=".CreateVenueActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".MapPickerActivity"
             android:exported="false"
             android:screenOrientation="portrait"/>
 
+        <activity android:name=".NotificationsActivity" android:exported="false" />
+
         <activity android:name=".MaintenanceActivity" android:exported="false" />
         <activity android:name=".ParticipantsActivity" android:exported="false" />
         <activity android:name=".CoachesActivity" android:exported="false" />
         <activity android:name=".AttendanceActivity" android:exported="false" />
-        <activity android:name=".ActivityDetailActivity" android:exported="false" />
         <activity android:name=".ActivitiesListActivity" android:exported="false" />
 
         <meta-data

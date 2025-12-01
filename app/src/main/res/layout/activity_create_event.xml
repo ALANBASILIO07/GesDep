@@ -78,7 +78,6 @@
                             android:id="@+id/etMacroEvent"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Ej: Juegos UAEMex 2025"
                             android:inputType="textCapSentences"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
@@ -96,7 +95,6 @@
                             android:inputType="textMultiLine|textCapSentences"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -112,13 +110,11 @@
                 android:layout_height="wrap_content"
                 style="@style/DashboardCardStyle"
                 android:layout_marginBottom="24dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
-
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -133,7 +129,6 @@
                             android:text="Deportivo"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -147,7 +142,6 @@
                             android:inputType="none"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -160,13 +154,12 @@
                             android:inputType="none"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 style="@style/DashboardTextStyle"
-                android:text="Logística"
+                android:text="Logística y Horarios"
                 android:textColor="@color/green_primary"
                 android:textAlignment="viewStart"
                 android:layout_marginBottom="8dp"/>
@@ -176,45 +169,58 @@
                 android:layout_height="wrap_content"
                 style="@style/DashboardCardStyle"
                 android:layout_marginBottom="24dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Fecha del Evento"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_marginBottom="12dp">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etDate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:drawableEnd="@drawable/ic_calendar"
+                            android:textColor="@color/text_primary_color"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:layout_marginBottom="12dp">
-
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="Fecha"
+                            android:hint="Hora Inicio"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_marginEnd="8dp">
                             <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etDate"
+                                android:id="@+id/etStartTime"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:focusable="false"
                                 android:clickable="true"
-                                android:drawableEnd="@drawable/ic_calendar"
+                                android:drawableEnd="@drawable/ic_check"
                                 android:textColor="@color/text_primary_color"/>
                         </com.google.android.material.textfield.TextInputLayout>
-
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="Hora"
+                            android:hint="Hora Término"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_marginStart="8dp">
                             <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etTime"
+                                android:id="@+id/etEndTime"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:focusable="false"
@@ -227,43 +233,30 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Lugar o Ubicación"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_marginBottom="8dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etPlace"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:hint="Seleccionar Sede / Lugar"
+                        android:layout_marginBottom="8dp"
+                        app:startIconDrawable="@drawable/ic_my_location"
+                        app:startIconTint="@color/icon_tint_color">
+                        <AutoCompleteTextView
+                            android:id="@+id/dropdownVenue"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="textCapWords"
+                            android:inputType="none"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Ubicación Exacta (GPS)"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_secondary_color"
-                        android:layout_marginBottom="4dp"/>
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnSelectLocation"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Seleccionar en Mapa"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:icon="@drawable/ic_my_location"
-                        app:iconGravity="textStart"
-                        android:layout_marginBottom="8dp"
-                        android:textColor="@color/green_primary"
-                        app:strokeColor="@color/green_primary"/>
-
+                        android:text="* Ubicación GPS automática según sede"
+                        android:textSize="11sp"
+                        android:textColor="@color/text_secondary_color"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 style="@style/DashboardTextStyle"
-                android:text="Cupos y Límites"
+                android:text="Inscripciones"
                 android:textColor="@color/green_primary"
                 android:textAlignment="viewStart"
                 android:layout_marginBottom="8dp"/>
@@ -273,49 +266,68 @@
                 android:layout_height="wrap_content"
                 style="@style/DashboardCardStyle"
                 android:layout_marginBottom="24dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:padding="16dp">
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="Mínimo"
+                        android:hint="Fecha Límite de Inscripción"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_marginEnd="8dp">
+                        android:layout_marginBottom="12dp">
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etMinQuota"
+                            android:id="@+id/etDeadlineDate"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:text="2"
+                            android:focusable="false"
+                            android:clickable="true"
+                            android:drawableEnd="@drawable/ic_calendar"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="Máximo"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_marginStart="8dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etMaxQuota"
-                            android:layout_width="match_parent"
+                        android:orientation="horizontal">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:textColor="@color/text_primary_color"/>
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:layout_weight="1"
+                            android:hint="Mínimo"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_marginEnd="8dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etMinQuota"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:text="2"
+                                android:textColor="@color/text_primary_color"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="Máximo"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_marginStart="8dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etMaxQuota"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:textColor="@color/text_primary_color"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 style="@style/DashboardTextStyle"
-                android:text="Imagen del Evento"
+                android:text="Imagen Principal"
                 android:textColor="@color/green_primary"
                 android:textAlignment="viewStart"
                 android:layout_marginBottom="8dp"/>
@@ -324,25 +336,20 @@
                 android:id="@+id/btnSelectImage"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
-                app:cardBackgroundColor="@color/card_surface_color"
-                android:layout_marginBottom="32dp"
+                style="@style/DashboardCardStyle"
+                android:layout_marginBottom="24dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
-
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
-
                     <ImageView
                         android:id="@+id/ivEventImage"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         android:src="@android:color/transparent"/>
-
                     <LinearLayout
                         android:id="@+id/layoutImagePlaceholder"
                         android:layout_width="wrap_content"
@@ -350,21 +357,54 @@
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:orientation="vertical">
-
                         <ImageView
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:src="@drawable/ic_camera"
                             app:tint="@color/text_secondary_color"/>
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Toca para añadir imagen"
+                            android:text="Toca para añadir portada"
                             android:textColor="@color/text_secondary_color"
                             android:layout_marginTop="8dp"/>
                     </LinearLayout>
                 </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                style="@style/DashboardTextStyle"
+                android:text="Galería Adicional (Máx 5)"
+                android:textColor="@color/green_primary"
+                android:textAlignment="viewStart"
+                android:layout_marginBottom="8dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/DashboardCardStyle"
+                android:layout_marginBottom="32dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddPhotos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Agregar Fotos"
+                        app:icon="@drawable/ic_camera"
+                        android:backgroundTint="@color/blue_button"
+                        android:layout_marginBottom="8dp"/>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvEventImages"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:minHeight="100dp"/>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton
@@ -389,11 +429,9 @@
         android:visibility="gone"
         android:clickable="true"
         android:focusable="true">
-
         <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"/>
     </FrameLayout>
-
 </LinearLayout>

@@ -5,22 +5,31 @@
             android:id="@+id/nav_admin_home"
             android:icon="@drawable/ic_home"
             android:title="Inicio" />
+
         <item
             android:id="@+id/nav_admin_events"
             android:icon="@drawable/ic_calendar"
             android:title="Gestionar Eventos" />
+
         <item
-            android:id="@+id/nav_admin_create_event"
-            android:icon="@drawable/ic_check"
-            android:title="Crear Evento" />
-        <item
-            android:id="@+id/nav_admin_participants"
+            android:id="@+id/nav_admin_users"
             android:icon="@drawable/ic_group"
-            android:title="Participantes" />
+            android:title="Gestionar Usuarios" />
+
         <item
-            android:id="@+id/nav_admin_coaches"
-            android:icon="@drawable/ic_person"
-            android:title="Entrenadores" />
+            android:id="@+id/nav_admin_venues"
+            android:icon="@drawable/ic_venues"
+            android:title="Gestión de Sedes" />
+
+        <item
+            android:id="@+id/nav_admin_inbox"
+            android:icon="@drawable/ic_mail"
+            android:title="Bandeja de Entrada" />
+
+        <item
+            android:id="@+id/nav_admin_map"
+            android:icon="@drawable/ic_my_location"
+            android:title="Mapa de Eventos" />
 
         <item
             android:id="@+id/nav_admin_reports"
@@ -28,7 +37,7 @@
             android:title="Reportes y Mantenimiento" />
     </group>
 
-    <item android:title="Configuración">
+    <item android:title="Sistema">
         <menu>
             <item
                 android:id="@+id/nav_admin_settings"
