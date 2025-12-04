@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +23,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser; // <--- ESTA ERA LA LÍNEA QUE FALTABA
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.uaemex.gesdep.models.EventModel;
 import com.uaemex.gesdep.utils.WindowUtils;
@@ -32,9 +34,13 @@ import java.util.Locale;
 public class EventDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private EventModel event;
-    private TextView tvTitle, tvDate, tvDesc, tvLocation;
+
+    // UI Components
+    private TextView tvTitle, tvDate, tvTime, tvDesc, tvLocation;
+    private TextView tvCostAmount, tvCostConcept;
     private ImageView ivBanner;
-    private Chip chipCategory, chipDiscipline;
+    private Chip chipCategory, chipDiscipline, chipCost;
+    private LinearLayout layoutCost;
     private MaterialButton btnAction;
     private FloatingActionButton fabEdit;
 
@@ -46,13 +52,12 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
 
-        // Transparente para que se vea la imagen detras
         WindowUtils.setGreenStatusBar(this);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance("gesdep");
 
-        // Recibir objeto
+        // Recibir evento (Serializable)
         event = (EventModel) getIntent().getSerializableExtra("event");
         if (event == null) {
             Toast.makeText(this, "Error al cargar evento", Toast.LENGTH_SHORT).show();
@@ -73,11 +78,19 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
 
         tvTitle = findViewById(R.id.tvEventTitle);
         tvDate = findViewById(R.id.tvEventDate);
+        tvTime = findViewById(R.id.tvEventTime);
         tvDesc = findViewById(R.id.tvEventDescription);
         tvLocation = findViewById(R.id.tvEventLocation);
+
+        tvCostAmount = findViewById(R.id.tvCostAmount);
+        tvCostConcept = findViewById(R.id.tvCostConcept);
+        layoutCost = findViewById(R.id.layoutCost);
+
         ivBanner = findViewById(R.id.ivEventBanner);
         chipCategory = findViewById(R.id.chipCategory);
         chipDiscipline = findViewById(R.id.chipDiscipline);
+        chipCost = findViewById(R.id.chipCost);
+
         btnAction = findViewById(R.id.btnAction);
         fabEdit = findViewById(R.id.fabEditEvent);
     }
@@ -89,17 +102,37 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
         chipCategory.setText(event.getCategory());
         chipDiscipline.setText(event.getDiscipline());
 
-        if (event.getEventDateTime() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, d MMMM • h:mm a", new Locale("es", "MX"));
-            tvDate.setText(sdf.format(event.getEventDateTime().toDate()));
+        // Formatear Fechas
+        SimpleDateFormat dateSdf = new SimpleDateFormat("EEEE, d MMMM yyyy", new Locale("es", "MX"));
+        SimpleDateFormat timeSdf = new SimpleDateFormat("h:mm a", new Locale("es", "MX"));
+
+        if (event.getStartTime() != null) {
+            tvDate.setText(dateSdf.format(event.getStartTime()));
+            String start = timeSdf.format(event.getStartTime());
+            String end = (event.getEndTime() != null) ? timeSdf.format(event.getEndTime()) : "?";
+            tvTime.setText(start + " - " + end);
+        } else if (event.getEventDateTime() != null) {
+            tvDate.setText(dateSdf.format(event.getEventDateTime()));
+            tvTime.setText(timeSdf.format(event.getEventDateTime()));
         }
 
-        // Cargar Banner (la primera imagen de la lista)
+        // Costos
+        if (event.isPaid()) {
+            chipCost.setText("De Pago");
+            layoutCost.setVisibility(View.VISIBLE);
+            tvCostAmount.setText(String.format("$%.2f MXN", event.getCost()));
+            tvCostConcept.setText(event.getPaymentConcept());
+        } else {
+            chipCost.setText("Gratuito");
+            layoutCost.setVisibility(View.GONE);
+        }
+
+        // Imagen
         if (event.getImageUrls() != null && !event.getImageUrls().isEmpty()) {
             Glide.with(this)
                     .load(event.getImageUrls().get(0))
                     .centerCrop()
-                    .placeholder(R.drawable.ic_calendar) // Placeholder
+                    .placeholder(R.drawable.ic_calendar)
                     .into(ivBanner);
         }
     }
@@ -114,14 +147,12 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        // Mapa en modo Lite (no interactivo, solo visualización)
         googleMap.getUiSettings().setMapToolbarEnabled(true);
 
         LatLng location = new LatLng(event.getLatitude(), event.getLongitude());
         googleMap.addMarker(new MarkerOptions().position(location).title(event.getPlaceName()));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15f));
 
-        // Al hacer clic, abrir Google Maps real para navegar
         googleMap.setOnMapClickListener(latLng -> {
             Uri gmmIntentUri = Uri.parse("geo:" + event.getLatitude() + "," + event.getLongitude() + "?q=" + Uri.encode(event.getPlaceName()));
             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
@@ -133,7 +164,10 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void checkRole() {
-        String uid = auth.getCurrentUser().getUid();
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null) return; // Seguridad
+
+        String uid = user.getUid();
 
         db.collection("users").document(uid).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
@@ -142,12 +176,10 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
                 if ("admin".equals(role)) {
                     // VISTA DE ADMIN
                     fabEdit.setVisibility(View.VISIBLE);
-                    btnAction.setText("GESTIONAR INSCRITOS");
-                    btnAction.setBackgroundColor(getColor(R.color.blue_button)); // Azul para gestión
+                    btnAction.setText("VER LISTA DE INSCRITOS");
+                    btnAction.setBackgroundColor(getColor(R.color.blue_button));
 
-                    fabEdit.setOnClickListener(v -> {
-                        Toast.makeText(this, "Editar evento (Próximamente)", Toast.LENGTH_SHORT).show();
-                    });
+                    fabEdit.setOnClickListener(v -> Toast.makeText(this, "Editar evento", Toast.LENGTH_SHORT).show());
                 } else {
                     // VISTA DE USUARIO
                     fabEdit.setVisibility(View.GONE);
@@ -158,12 +190,7 @@ public class EventDetailActivity extends AppCompatActivity implements OnMapReady
     }
 
     private void setupUserActions(String uid) {
-        // Aquí verificaremos si ya está inscrito
-        // Por ahora, acción básica de inscripción
         btnAction.setText("INSCRIBIRME AHORA");
-        btnAction.setOnClickListener(v -> {
-            Toast.makeText(this, "Inscribiendo...", Toast.LENGTH_SHORT).show();
-            // Aquí llamaremos al método de inscripción en Firebase
-        });
+        btnAction.setOnClickListener(v -> Toast.makeText(this, "Procesando inscripción...", Toast.LENGTH_SHORT).show());
     }
 }

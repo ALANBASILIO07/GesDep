@@ -9,7 +9,7 @@
     android:layout_marginVertical="8dp"
     app:cardCornerRadius="12dp"
     app:cardElevation="3dp"
-    app:cardBackgroundColor="@color/white"
+    app:cardBackgroundColor="@color/card_surface_color"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
@@ -17,154 +17,157 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            android:layout_marginEnd="12dp">
+
+            <ImageView
+                android:id="@+id/ivEventThumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_calendar"
+                android:scaleType="centerCrop"
+                android:background="@color/gray_light"/>
+        </androidx.cardview.widget.CardView>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+
+                <TextView
+                    android:id="@+id/tvCategory"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    tools:text="Deportivo • Fútbol"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/green_primary"
+                    android:textAllCaps="true"
+                    android:ellipsize="end"
+                    android:maxLines="1"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/green_light"
+                    app:cardCornerRadius="4dp"
+                    app:cardElevation="0dp">
+                    <TextView
+                        android:id="@+id/tvStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="ACTIVO"
+                        android:textSize="9sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/green_dark"
+                        android:paddingHorizontal="6dp"
+                        android:paddingVertical="2dp"
+                        android:textAllCaps="true"/>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tvEventName"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                tools:text="Torneo de Fútbol"
-                android:textSize="18sp"
+                tools:text="Gran Torneo de Verano"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/gray_dark"
+                android:textColor="@color/text_primary_color"
+                android:maxLines="2"
                 android:ellipsize="end"
-                android:maxLines="1"/>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/green_light"
-                app:cardCornerRadius="4dp"
-                app:cardElevation="0dp">
-
-                <TextView
-                    android:id="@+id/tvStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    tools:text="CONFIRMADO"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="4dp"
-                    android:textAllCaps="true"/>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/gray_light"
-            android:layout_marginBottom="8dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false"
-            android:layout_marginBottom="4dp">
+                android:layout_marginBottom="4dp"/>
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
-
+                android:gravity="center_vertical"
+                android:layout_marginBottom="2dp">
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
                     android:src="@drawable/ic_calendar"
-                    app:tint="@color/blue_button"
-                    android:layout_marginEnd="6dp"
-                    android:contentDescription="Fecha"/>
-
+                    app:tint="@color/text_secondary_color"
+                    android:layout_marginEnd="4dp"/>
                 <TextView
                     android:id="@+id/tvDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="27 Nov, 10:00 AM"
-                    android:textSize="13sp"
-                    android:textColor="@color/gray_text"/>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/tvCategory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="Deportivo • Fútbol"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textColor="@color/green_primary"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingEnd="8dp">
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@android:drawable/ic_dialog_map"
-                    app:tint="@color/green_primary"
-                    android:layout_marginEnd="6dp"
-                    android:contentDescription="Ubicación"/>
-
-                <TextView
-                    android:id="@+id/tvLocation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:text="Unidad Dep. Central"
-                    android:textSize="13sp"
-                    android:textColor="@color/gray_text"
-                    android:maxLines="1"
-                    android:ellipsize="end"/>
+                    tools:text="Vie, 20 Oct • 10:00 AM"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary_color"/>
             </LinearLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_group"
-                    app:tint="@color/purple_participants"
-                    android:layout_marginEnd="4dp"
-                    android:contentDescription="Participantes"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginEnd="8dp">
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_my_location"
+                        app:tint="@color/text_secondary_color"
+                        android:layout_marginEnd="4dp"/>
+                    <TextView
+                        android:id="@+id/tvLocation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="Estadio Universitario"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_secondary_color"
+                        android:maxLines="1"
+                        android:ellipsize="end"/>
+                </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tvParticipants"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="15/20"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/purple_participants"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_group"
+                        app:tint="@color/purple_participants"
+                        android:layout_marginEnd="4dp"/>
+                    <TextView
+                        android:id="@+id/tvParticipants"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="15/20"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/purple_participants"/>
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
 
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

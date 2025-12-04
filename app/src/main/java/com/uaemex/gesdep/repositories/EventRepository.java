@@ -1,74 +1,43 @@
 package com.uaemex.gesdep.repositories;
 
 import android.util.Log;
-
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
-import com.uaemex.gesdep.models.EventChangeLogModel; // Asegúrate de tener este modelo o coméntalo si no
+import com.google.firebase.firestore.Transaction;
 import com.uaemex.gesdep.models.EventModel;
 import com.uaemex.gesdep.utils.NotificationHelper;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-/**
- * Repositorio para gestionar operaciones CRUD de eventos
- * Actualizado para usar Getters/Setters del nuevo EventModel
- */
 public class EventRepository {
 
     private static final String TAG = "EventRepository";
     private static final String COLLECTION_EVENTS = "events";
-    private static final String COLLECTION_CHANGELOG = "event_changelog";
+    private static final String SUBCOLLECTION_REGISTRATIONS = "registrations";
 
     private final FirebaseFirestore db;
     private final NotificationHelper notificationHelper;
 
     public EventRepository() {
-        // Usar la instancia correcta "gesdep"
         this.db = FirebaseFirestore.getInstance("gesdep");
         this.notificationHelper = new NotificationHelper();
     }
 
     /**
-     * Obtiene todos los eventos activos ordenados por fecha
+     * MODIFICADO: Obtiene TODOS los eventos (sin filtrar por status en el servidor)
+     * Esto permite filtrar localmente por Activos, Cancelados, Finalizados, etc.
      */
-    public void getAllActiveEvents(OnEventsLoadedListener listener) {
-        // Arrays.asList es mejor para versiones antiguas de Java que List.of
+    public void getAllEvents(OnEventsLoadedListener listener) {
         db.collection(COLLECTION_EVENTS)
-                .whereIn("status", Arrays.asList("ACTIVO", "CONFIRMADO"))
-                .orderBy("eventDateTime", Query.Direction.ASCENDING)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<EventModel> events = new ArrayList<>();
-                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        EventModel event = doc.toObject(EventModel.class);
-                        if (event != null) {
-                            event.setId(doc.getId()); // Asegurar ID
-                            events.add(event);
-                        }
-                    }
-                    Log.d(TAG, "Eventos cargados: " + events.size());
-                    listener.onEventsLoaded(events);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error cargando eventos", e);
-                    listener.onError(e.getMessage());
-                });
-    }
-
-    /**
-     * Obtiene eventos por categoría (Deportivo, Cultural, etc.)
-     */
-    public void getEventsByType(String category, OnEventsLoadedListener listener) {
-        db.collection(COLLECTION_EVENTS)
-                .whereEqualTo("category", category)
-                .whereIn("status", Arrays.asList("ACTIVO", "CONFIRMADO"))
-                .orderBy("eventDateTime", Query.Direction.ASCENDING)
+                .orderBy("eventDateTime", Query.Direction.ASCENDING) // Orden cronológico
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<EventModel> events = new ArrayList<>();
@@ -81,107 +50,71 @@ public class EventRepository {
                     }
                     listener.onEventsLoaded(events);
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error cargando eventos por categoría", e);
-                    listener.onError(e.getMessage());
-                });
+                .addOnFailureListener(e -> listener.onError(e.getMessage()));
     }
 
-    /**
-     * Obtiene un evento por ID
-     */
-    public void getEventById(String eventId, OnEventLoadedListener listener) {
-        db.collection(COLLECTION_EVENTS)
-                .document(eventId)
+    // ... (Mantén el resto de métodos: checkUserRegistration, registerUserToEvent, cancelEvent igual que antes) ...
+    // Solo pego los necesarios para que compile, asegúrate de mantener los de inscripción que te di antes.
+
+    public void checkUserRegistration(String eventId, String userId, OnCheckRegistrationListener listener) {
+        db.collection(COLLECTION_EVENTS).document(eventId)
+                .collection(SUBCOLLECTION_REGISTRATIONS).document(userId)
                 .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        EventModel event = documentSnapshot.toObject(EventModel.class);
-                        if (event != null) event.setId(documentSnapshot.getId());
-                        listener.onEventLoaded(event);
-                    } else {
-                        listener.onError("Evento no encontrado");
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error cargando evento", e);
-                    listener.onError(e.getMessage());
-                });
+                .addOnSuccessListener(documentSnapshot -> listener.onResult(documentSnapshot.exists()))
+                .addOnFailureListener(e -> listener.onError(e.getMessage()));
     }
 
-    /**
-     * Crea un nuevo evento
-     */
-    public void createEvent(EventModel event, String userId, String userName, OnEventSavedListener listener) {
-        // Validar fecha futura (Usando GETTER)
-        if (event.getEventDateTime() == null || event.getEventDateTime().toDate().getTime() < System.currentTimeMillis()) {
-            listener.onError("La fecha del evento debe ser futura");
-            return;
-        }
+    public void registerUserToEvent(String eventId, String userId, String userName, OnRegistrationResultListener listener) {
+        final DocumentReference eventRef = db.collection(COLLECTION_EVENTS).document(eventId);
+        final DocumentReference registrationRef = eventRef.collection(SUBCOLLECTION_REGISTRATIONS).document(userId);
 
-        // Validar capacidades (Usando GETTERS)
-        if (event.getMaxQuota() < event.getMinQuota()) {
-            listener.onError("La capacidad máxima debe ser mayor o igual a la mínima");
-            return;
-        }
+        db.runTransaction((Transaction.Function<Void>) transaction -> {
+            DocumentSnapshot eventSnapshot = transaction.get(eventRef);
+            DocumentSnapshot regSnapshot = transaction.get(registrationRef);
 
-        // Generar ID
-        DocumentReference docRef = db.collection(COLLECTION_EVENTS).document();
-        event.setId(docRef.getId()); // Usando SETTER
-        event.setOrganizerId(userId);
-        event.setOrganizerName(userName);
-        event.setCreatedAt(Timestamp.now());
+            if (!eventSnapshot.exists()) throw new FirebaseFirestoreException("El evento no existe", FirebaseFirestoreException.Code.NOT_FOUND);
+            if (regSnapshot.exists()) throw new FirebaseFirestoreException("ALREADY_REGISTERED", FirebaseFirestoreException.Code.ABORTED);
 
-        // Guardar evento
-        docRef.set(event)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Evento creado: " + event.getId());
-                    // Opcional: Registrar en changelog si lo implementas
-                    listener.onEventSaved(event);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error creando evento", e);
-                    listener.onError(e.getMessage());
-                });
+            Long current = eventSnapshot.getLong("currentParticipants");
+            Long max = eventSnapshot.getLong("maxQuota");
+            String status = eventSnapshot.getString("status");
+
+            if (current == null) current = 0L;
+            if (max == null) max = 0L;
+
+            if (current >= max) throw new FirebaseFirestoreException("EVENT_FULL", FirebaseFirestoreException.Code.ABORTED);
+            if ("CANCELADO".equals(status) || "FINALIZADO".equals(status)) throw new FirebaseFirestoreException("EVENT_CLOSED", FirebaseFirestoreException.Code.ABORTED);
+
+            Map<String, Object> regData = new HashMap<>();
+            regData.put("userId", userId);
+            regData.put("userName", userName);
+            regData.put("registeredAt", new Date());
+            regData.put("status", "ACTIVE");
+
+            transaction.set(registrationRef, regData);
+            transaction.update(eventRef, "currentParticipants", current + 1);
+            return null;
+        }).addOnSuccessListener(aVoid -> listener.onSuccess()).addOnFailureListener(e -> {
+            if (e instanceof FirebaseFirestoreException) {
+                String code = e.getMessage();
+                if ("ALREADY_REGISTERED".equals(code)) listener.onAlreadyRegistered();
+                else if ("EVENT_FULL".equals(code)) listener.onEventFull();
+                else listener.onError(e.getMessage());
+            } else {
+                listener.onError(e.getMessage());
+            }
+        });
     }
 
-    /**
-     * Cancela un evento
-     */
-    public void cancelEvent(String eventId, String eventName, String cancellationReason,
-                            String userId, String userName, OnEventCancelledListener listener) {
-        db.collection(COLLECTION_EVENTS)
-                .document(eventId)
-                .update("status", "CANCELADO") // Solo actualizamos estado por ahora
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Evento cancelado: " + eventId);
-                    // Notificar participantes...
-                    listener.onEventCancelled();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error cancelando evento", e);
-                    listener.onError(e.getMessage());
-                });
+    public void cancelEvent(String eventId, String eventName, String cancellationReason, String userId, String userName, OnEventCancelledListener listener) {
+        db.collection(COLLECTION_EVENTS).document(eventId).update("status", "CANCELADO")
+                .addOnSuccessListener(aVoid -> listener.onEventCancelled())
+                .addOnFailureListener(e -> listener.onError(e.getMessage()));
     }
 
-    // Interfaces para callbacks
-    public interface OnEventsLoadedListener {
-        void onEventsLoaded(List<EventModel> events);
-        void onError(String error);
-    }
-
-    public interface OnEventLoadedListener {
-        void onEventLoaded(EventModel event);
-        void onError(String error);
-    }
-
-    public interface OnEventSavedListener {
-        void onEventSaved(EventModel event);
-        void onError(String error);
-    }
-
-    public interface OnEventCancelledListener {
-        void onEventCancelled();
-        void onError(String error);
-    }
+    // Interfaces
+    public interface OnEventsLoadedListener { void onEventsLoaded(List<EventModel> events); void onError(String error); }
+    public interface OnCheckRegistrationListener { void onResult(boolean isRegistered); void onError(String error); }
+    public interface OnRegistrationResultListener { void onSuccess(); void onEventFull(); void onAlreadyRegistered(); void onError(String error); }
+    public interface OnEventCancelledListener { void onEventCancelled(); void onError(String error); }
 }

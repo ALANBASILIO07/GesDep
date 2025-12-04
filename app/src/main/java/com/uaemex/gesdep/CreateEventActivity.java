@@ -27,8 +27,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.Timestamp;
+// Importamos Date de Java, no Timestamp de Firebase para los setters del modelo
+import java.util.Date;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,16 +42,25 @@ import com.uaemex.gesdep.utils.WindowUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 public class CreateEventActivity extends AppCompatActivity {
 
-    // UI
+    // UI Components
     private TextInputEditText etTitle, etMacroEvent, etDescription, etMinQuota, etMaxQuota;
     private TextInputEditText etDate, etStartTime, etEndTime, etDeadlineDate;
+
+    // Pagos
+    private SwitchMaterial switchPaidEvent;
+    private LinearLayout containerPaymentDetails;
+    private AutoCompleteTextView dropdownPaymentType;
+    private TextInputEditText etCost;
+
+    // Dropdowns
     private AutoCompleteTextView dropdownCategory, dropdownDiscipline, dropdownModality, dropdownVenue;
+
+    // Botones y Multimedia
     private MaterialButton btnPublishEvent, btnAddPhotos;
     private MaterialCardView btnSelectImage;
     private ImageView ivEventImage;
@@ -68,7 +79,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private double selectedLat = 0.0;
     private double selectedLng = 0.0;
 
-    // Multimedia
+    // Multimedia Uris
     private Uri mainImageUri = null;
     private List<Uri> galleryUris = new ArrayList<>();
     private GalleryAdapter galleryAdapter;
@@ -111,6 +122,7 @@ public class CreateEventActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_event);
 
         WindowUtils.setGreenStatusBar(this);
+
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance("gesdep");
         storage = FirebaseStorage.getInstance();
@@ -139,6 +151,12 @@ public class CreateEventActivity extends AppCompatActivity {
         dropdownModality = findViewById(R.id.dropdownModality);
         dropdownVenue = findViewById(R.id.dropdownVenue);
 
+        // Pagos
+        switchPaidEvent = findViewById(R.id.switchPaidEvent);
+        containerPaymentDetails = findViewById(R.id.containerPaymentDetails);
+        dropdownPaymentType = findViewById(R.id.dropdownPaymentType);
+        etCost = findViewById(R.id.etCost);
+
         btnSelectImage = findViewById(R.id.btnSelectImage);
         ivEventImage = findViewById(R.id.ivEventImage);
         layoutImagePlaceholder = findViewById(R.id.layoutImagePlaceholder);
@@ -154,6 +172,7 @@ public class CreateEventActivity extends AppCompatActivity {
         setAdapterFromResource(dropdownCategory, R.array.event_categories);
         setAdapterFromResource(dropdownDiscipline, R.array.event_disciplines);
         setAdapterFromResource(dropdownModality, R.array.event_modalities);
+        setAdapterFromResource(dropdownPaymentType, R.array.event_payment_types);
     }
 
     private void setAdapterFromResource(AutoCompleteTextView dropdown, int arrayResId) {
@@ -185,13 +204,11 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
-        // Pickers
         etDate.setOnClickListener(v -> showDatePicker(etDate, calendarEventDate));
         etStartTime.setOnClickListener(v -> showTimePicker(etStartTime, calendarStartTime));
         etEndTime.setOnClickListener(v -> showTimePicker(etEndTime, calendarEndTime));
         etDeadlineDate.setOnClickListener(v -> showDatePicker(etDeadlineDate, calendarDeadline));
 
-        // Sede
         dropdownVenue.setOnItemClickListener((parent, view, position, id) -> {
             String selection = (String) parent.getItemAtPosition(position);
             for (VenueModel v : venueList) {
@@ -201,6 +218,16 @@ public class CreateEventActivity extends AppCompatActivity {
                     selectedLng = v.getLongitude();
                     break;
                 }
+            }
+        });
+
+        switchPaidEvent.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                containerPaymentDetails.setVisibility(View.VISIBLE);
+            } else {
+                containerPaymentDetails.setVisibility(View.GONE);
+                etCost.setText("");
+                dropdownPaymentType.setText("", false);
             }
         });
 
@@ -233,10 +260,12 @@ public class CreateEventActivity extends AppCompatActivity {
         if (android.os.Build.VERSION.SDK_INT >= 33 ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            if (isMultiSelect) intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            else bannerLauncher.launch(intent);
-
-            if (isMultiSelect) galleryPickerLauncher.launch(intent);
+            if (isMultiSelect) {
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                galleryPickerLauncher.launch(intent);
+            } else {
+                bannerLauncher.launch(intent);
+            }
         } else {
             requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 101);
         }
@@ -244,31 +273,51 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private void validateAndCreateEvent() {
         String title = etTitle.getText().toString().trim();
+        String category = dropdownCategory.getText().toString();
 
-        if (title.isEmpty() || selectedVenue == null || etDate.getText().toString().isEmpty()) {
-            Toast.makeText(this, "Faltan datos obligatorios", Toast.LENGTH_SHORT).show();
+        if (title.isEmpty() || category.isEmpty() || selectedVenue == null || etDate.getText().toString().isEmpty() ||
+                etStartTime.getText().toString().isEmpty() || etEndTime.getText().toString().isEmpty()) {
+            Toast.makeText(this, "Completa los campos obligatorios (Título, Categoría, Sede, Horarios)", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Sincronizar fechas con horas
+        if (switchPaidEvent.isChecked()) {
+            String costStr = etCost.getText().toString().trim();
+            if (costStr.isEmpty() || dropdownPaymentType.getText().toString().isEmpty()) {
+                Toast.makeText(this, "Indica el monto y concepto de pago", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        // Sincronizar fecha con horas
         copyDateToTime(calendarEventDate, calendarStartTime);
         copyDateToTime(calendarEventDate, calendarEndTime);
 
-        // Validar horas
+        if (!etDeadlineDate.getText().toString().isEmpty()) {
+            // Si hay fecha límite, asignamos las 23:59 de ese día
+            calendarDeadline.set(Calendar.HOUR_OF_DAY, 23);
+            calendarDeadline.set(Calendar.MINUTE, 59);
+        }
+
+        // Validar consistencia de horas
         if (calendarEndTime.before(calendarStartTime)) {
-            Toast.makeText(this, "La hora de fin es incorrecta", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "La hora de fin no puede ser antes del inicio", Toast.LENGTH_LONG).show();
             return;
         }
 
         loadingOverlay.setVisibility(View.VISIBLE);
         btnPublishEvent.setEnabled(false);
 
-        List<Uri> allImages = new ArrayList<>();
-        if (mainImageUri != null) allImages.add(mainImageUri);
-        allImages.addAll(galleryUris);
+        // Preparar lista de imágenes
+        List<Uri> allImagesToUpload = new ArrayList<>();
+        if (mainImageUri != null) allImagesToUpload.add(mainImageUri);
+        allImagesToUpload.addAll(galleryUris);
 
-        if (!allImages.isEmpty()) uploadImagesRecursive(allImages, 0, new ArrayList<>());
-        else saveEventToFirestore(new ArrayList<>());
+        if (!allImagesToUpload.isEmpty()) {
+            uploadImagesRecursive(allImagesToUpload, 0, new ArrayList<>());
+        } else {
+            saveEventToFirestore(new ArrayList<>());
+        }
     }
 
     private void copyDateToTime(Calendar sourceDate, Calendar targetTime) {
@@ -290,7 +339,11 @@ public class CreateEventActivity extends AppCompatActivity {
                     uploadedUrls.add(uri.toString());
                     uploadImagesRecursive(uris, index + 1, uploadedUrls);
                 }))
-                .addOnFailureListener(e -> uploadImagesRecursive(uris, index + 1, uploadedUrls));
+                .addOnFailureListener(e -> {
+                    // Si falla una, seguimos con la siguiente
+                    Toast.makeText(this, "Error subiendo una imagen", Toast.LENGTH_SHORT).show();
+                    uploadImagesRecursive(uris, index + 1, uploadedUrls);
+                });
     }
 
     private void saveEventToFirestore(List<String> imageUrls) {
@@ -303,21 +356,36 @@ public class CreateEventActivity extends AppCompatActivity {
         event.setDiscipline(dropdownDiscipline.getText().toString());
         event.setModality(dropdownModality.getText().toString());
 
-        // Datos de Sede
+        // Sede
         event.setPlaceName(selectedVenue.getName());
         event.setAddress(selectedVenue.getAddress());
         event.setLatitude(selectedLat);
         event.setLongitude(selectedLng);
 
-        // Tiempos (NUEVOS)
-        event.setStartTime(new Timestamp(calendarStartTime.getTime()));
-        event.setEndTime(new Timestamp(calendarEndTime.getTime()));
+        // **CORRECCIÓN CLAVE:** Usar .getTime() (Date) en lugar de new Timestamp()
+        event.setStartTime(calendarStartTime.getTime());
+        event.setEndTime(calendarEndTime.getTime());
+
         if (!etDeadlineDate.getText().toString().isEmpty()) {
-            event.setRegistrationDeadline(new Timestamp(calendarDeadline.getTime()));
+            event.setRegistrationDeadline(calendarDeadline.getTime());
         }
 
-        // Compatibilidad con campos viejos (para evitar crash en listas viejas)
-        event.setEventDateTime(new Timestamp(calendarStartTime.getTime()));
+        // Campo legacy para compatibilidad
+        event.setEventDateTime(calendarStartTime.getTime());
+
+        // Pagos
+        event.setPaid(switchPaidEvent.isChecked());
+        if (event.isPaid()) {
+            try {
+                event.setCost(Double.parseDouble(etCost.getText().toString().trim()));
+                event.setPaymentConcept(dropdownPaymentType.getText().toString());
+            } catch (Exception e) {
+                event.setCost(0.0);
+            }
+        } else {
+            event.setCost(0.0);
+            event.setPaymentConcept("Gratuito");
+        }
 
         try {
             event.setMinQuota(Integer.parseInt(etMinQuota.getText().toString()));
@@ -329,9 +397,9 @@ public class CreateEventActivity extends AppCompatActivity {
 
         String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : "anon";
         event.setOrganizerId(uid);
-        event.setOrganizerName("UAEMex GESDEP");
+        event.setOrganizerName("IMCUFIDE");
         event.setStatus("ACTIVO");
-        event.setCreatedAt(Timestamp.now());
+        event.setCreatedAt(new Date()); // Date actual
         event.setImageUrls(imageUrls);
 
         db.collection("events").add(event)

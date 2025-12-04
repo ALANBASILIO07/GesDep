@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            app:title="Eventos Disponibles"
+            app:title="Explorar Eventos"
             app:titleTextColor="@color/white"
             app:navigationIcon="@drawable/ic_arrow_black"
             app:navigationIconTint="@color/white"/>
@@ -72,19 +72,44 @@
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:hint="Sede / Lugar">
-                <AutoCompleteTextView
-                    android:id="@+id/filterVenue"
-                    android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
-                    android:text="Todas"
-                    android:textSize="14sp"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:hint="Sede">
+                    <AutoCompleteTextView
+                        android:id="@+id/filterVenue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="Todas"
+                        android:textSize="13sp"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:hint="Estatus">
+                    <AutoCompleteTextView
+                        android:id="@+id/filterStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="Todos"
+                        android:textSize="13sp"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
 
         </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -119,7 +144,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No hay eventos disponibles"
+            android:text="No hay eventos"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/green_primary"
@@ -129,7 +154,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Parece que no hay actividades programadas con estos filtros."
+            android:text="No se encontraron resultados con los filtros actuales."
             android:textSize="14sp"
             android:textColor="@color/text_secondary_color"
             android:textAlignment="center"/>

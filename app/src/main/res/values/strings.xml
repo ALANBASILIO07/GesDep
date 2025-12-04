@@ -38,4 +38,13 @@
         <item>Jornada Completa</item>
     </string-array>
 
+    <string-array name="event_payment_types">
+        <item>Inscripción (Cuota única)</item>
+        <item>Arbitraje (Por partido)</item>
+        <item>Boleto de Entrada</item>
+        <item>Cuota de Recuperación</item>
+        <item>Donación Voluntaria</item>
+        <item>Fianza</item>
+    </string-array>
+
 </resources>

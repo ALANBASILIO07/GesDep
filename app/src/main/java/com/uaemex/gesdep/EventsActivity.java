@@ -31,7 +31,7 @@ import java.util.List;
 public class EventsActivity extends AppCompatActivity implements EventsAdapter.OnEventClickListener {
 
     private MaterialToolbar toolbar;
-    private AutoCompleteTextView filterDiscipline, filterModality, filterVenue;
+    private AutoCompleteTextView filterDiscipline, filterModality, filterVenue, filterStatus; // AGREGADO Status
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private View emptyState;
@@ -39,7 +39,7 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
 
     private EventsAdapter adapter;
     private EventRepository repository;
-    private List<EventModel> allEventsList = new ArrayList<>();
+    private List<EventModel> allEventsList = new ArrayList<>(); // Lista maestra con TODOS los datos
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
@@ -61,9 +61,10 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
 
         repository = new EventRepository();
 
-        // Cargar filtros y datos
         setupFilters();
         loadVenuesForFilter();
+
+        // Cargar todo una sola vez
         loadAllEvents();
     }
 
@@ -71,7 +72,8 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
         toolbar = findViewById(R.id.toolbar);
         filterDiscipline = findViewById(R.id.filterDiscipline);
         filterModality = findViewById(R.id.filterModality);
-        filterVenue = findViewById(R.id.filterVenue); // NUEVO
+        filterVenue = findViewById(R.id.filterVenue);
+        filterStatus = findViewById(R.id.filterStatus); // Nuevo campo
         recyclerView = findViewById(R.id.recyclerView);
         progressBar = findViewById(R.id.progressBar);
         emptyState = findViewById(R.id.emptyState);
@@ -118,6 +120,16 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
         modalities.add("Todas");
         modalities.addAll(Arrays.asList(getResources().getStringArray(R.array.event_modalities)));
         setFilterAdapter(filterModality, modalities);
+
+        // ESTATUS (Nuevo Filtro Manual)
+        List<String> statuses = new ArrayList<>();
+        statuses.add("Todos");
+        statuses.add("ACTIVO");
+        statuses.add("EN VIVO");
+        statuses.add("PENDIENTE");
+        statuses.add("FINALIZADO");
+        statuses.add("CANCELADO");
+        setFilterAdapter(filterStatus, statuses);
     }
 
     private void loadVenuesForFilter() {
@@ -135,19 +147,23 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
     private void setFilterAdapter(AutoCompleteTextView view, List<String> data) {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, data);
         view.setAdapter(adapter);
-        view.setText("Todas", false);
+        // Seleccionar opción por defecto para evitar nulos
+        if (view.getId() == R.id.filterStatus) view.setText("Todos", false);
+        else view.setText("Todas", false);
+
         view.setOnItemClickListener((parent, v, position, id) -> applyFilters());
     }
 
     private void loadAllEvents() {
         showLoading(true);
-        repository.getAllActiveEvents(new EventRepository.OnEventsLoadedListener() {
+        // Llamamos al método nuevo que trae TODO sin filtrar en servidor
+        repository.getAllEvents(new EventRepository.OnEventsLoadedListener() {
             @Override
             public void onEventsLoaded(List<EventModel> events) {
                 showLoading(false);
                 allEventsList = events;
-                checkAutoCancellations(events); // Validar reglas de negocio
-                applyFilters(); // Mostrar lista filtrada
+                checkAutoCancellations(events);
+                applyFilters(); // Aplicar filtros locales (incluido status)
             }
 
             @Override
@@ -162,16 +178,25 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
         String selDisc = filterDiscipline.getText().toString();
         String selMod = filterModality.getText().toString();
         String selVenue = filterVenue.getText().toString();
+        String selStatus = filterStatus.getText().toString(); // Nuevo filtro
 
         List<EventModel> filteredList = new ArrayList<>();
 
         for (EventModel event : allEventsList) {
-            boolean matchDisc = selDisc.equals("Todas") || selDisc.equals(event.getDiscipline());
-            boolean matchMod = selMod.equals("Todas") || selMod.equals(event.getModality());
-            boolean matchVenue = selVenue.equals("Todas") || selVenue.equals(event.getPlaceName());
+            // Lógica de coincidencia (ignora mayúsculas/minúsculas para seguridad)
+            boolean matchDisc = selDisc.equals("Todas") || selDisc.equalsIgnoreCase(event.getDiscipline());
+            boolean matchMod = selMod.equals("Todas") || selMod.equalsIgnoreCase(event.getModality());
+            boolean matchVenue = selVenue.equals("Todas") || selVenue.equalsIgnoreCase(event.getPlaceName());
 
-            // Solo mostrar si no está cancelado (o mostrarlo con estilo diferente en el adaptador)
-            if (matchDisc && matchMod && matchVenue) {
+            // Lógica de Estatus (Calculamos el estatus dinámico o usamos el guardado)
+            String currentStatus = event.getTimeStatus(); // Usamos el helper del modelo
+            if (event.getStatus() != null && event.getStatus().equals("CANCELADO")) {
+                currentStatus = "CANCELADO";
+            }
+
+            boolean matchStatus = selStatus.equals("Todos") || selStatus.equalsIgnoreCase(currentStatus) || selStatus.equalsIgnoreCase(event.getStatus());
+
+            if (matchDisc && matchMod && matchVenue && matchStatus) {
                 filteredList.add(event);
             }
         }
@@ -186,33 +211,31 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
 
     /**
      * Lógica de Negocio: Cancelación Automática
-     * Si la fecha ya pasó y no cumplió el cupo mínimo -> CANCELADO
      */
     private void checkAutoCancellations(List<EventModel> events) {
         long now = System.currentTimeMillis();
+        boolean needsRefresh = false;
+
         for (EventModel event : events) {
-            // Validar fecha y cupo
             if (event.getEventDateTime() != null &&
-                    event.getEventDateTime().toDate().getTime() < now &&
+                    event.getEventDateTime().getTime() < now &&
                     event.getCurrentParticipants() < event.getMinQuota() &&
                     !"CANCELADO".equals(event.getStatus())) {
 
-                // Actualizar estado localmente para la vista
                 event.setStatus("CANCELADO");
+                needsRefresh = true; // Refrescar lista si algo cambió
 
-                // Actualizar en Firebase (Idealmente esto va en Cloud Functions)
                 repository.cancelEvent(event.getId(), event.getTitle(),
-                        "Cancelado automáticamente por falta de quórum",
-                        "SYSTEM", "Sistema",
+                        "Cancelado automáticamente", "SYSTEM", "Sistema",
                         new EventRepository.OnEventCancelledListener() {
-                            @Override
-                            public void onEventCancelled() {
-                                // Evento cancelado en backend
-                            }
-                            @Override
-                            public void onError(String error) { }
+                            @Override public void onEventCancelled() { }
+                            @Override public void onError(String error) { }
                         });
             }
+        }
+
+        if (needsRefresh) {
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -229,8 +252,16 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
 
     @Override
     public void onEventClick(EventModel event) {
-        Intent intent = new Intent(this, EventDetailActivity.class);
-        intent.putExtra("event", event);
+        Intent intent = new Intent(this, ActivityEventDetail.class);
+        intent.putExtra("eventModel", event);
+        intent.putExtra("eventId", event.getId());
         startActivity(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Recargar al volver por si se editó algo en el detalle
+        loadAllEvents();
     }
 }

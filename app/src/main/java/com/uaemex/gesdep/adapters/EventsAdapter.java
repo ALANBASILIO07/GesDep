@@ -4,19 +4,21 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView; // Importación necesaria
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.card.MaterialCardView;
 import com.uaemex.gesdep.R;
 import com.uaemex.gesdep.models.EventModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,7 +36,6 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     public EventsAdapter(OnEventClickListener listener) {
         this.events = new ArrayList<>();
         this.listener = listener;
-        // Formato: 27 Nov, 10:00 AM
         this.dateFormat = new SimpleDateFormat("dd MMM, HH:mm", new Locale("es", "MX"));
     }
 
@@ -65,18 +66,12 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
 
     class EventViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView tvTitle;
-        private TextView tvCategory;
-        private TextView tvDate;
-        private TextView tvLocation;
-        private TextView tvParticipants;
-        private TextView tvStatus;
+        private TextView tvTitle, tvCategory, tvDate, tvLocation, tvParticipants, tvStatus;
         private MaterialCardView cardStatus;
-        // private ImageView imgEvent; // Comentado hasta que el XML lo tenga
+        private ImageView ivThumbnail;
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
-
             tvTitle = itemView.findViewById(R.id.tvEventName);
             tvCategory = itemView.findViewById(R.id.tvCategory);
             tvDate = itemView.findViewById(R.id.tvDate);
@@ -84,7 +79,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
             tvParticipants = itemView.findViewById(R.id.tvParticipants);
             tvStatus = itemView.findViewById(R.id.tvStatus);
             cardStatus = itemView.findViewById(R.id.cardStatus);
-            // imgEvent = itemView.findViewById(R.id.imgEvent);
+            ivThumbnail = itemView.findViewById(R.id.ivEventThumbnail);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
@@ -95,54 +90,66 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         }
 
         public void bind(EventModel event) {
-            // 1. Título (Usando el Getter correcto)
             tvTitle.setText(event.getTitle());
 
-            // 2. Categoría Detallada (Disciplina • Modalidad)
+            // Categoría
             String discipline = event.getDiscipline() != null ? event.getDiscipline() : "General";
             String modality = event.getModality() != null ? event.getModality() : "";
+            tvCategory.setText(discipline + (modality.isEmpty() ? "" : " • " + modality));
 
-            // Si hay modalidad, la agregamos con un punto separador
-            String categoryText = discipline + (modality.isEmpty() ? "" : " • " + modality);
-            tvCategory.setText(categoryText);
+            // Fecha (Lógica BLINDADA)
+            String dateText = "Por definir";
+            Date dateToFormat = null;
 
-            // 3. Fecha
-            if (event.getEventDateTime() != null) {
-                tvDate.setText(dateFormat.format(event.getEventDateTime().toDate()));
-            } else {
-                tvDate.setText("Por definir");
+            // Intentar obtener la fecha de inicio (puede ser Timestamp o Date)
+            Object startObj = event.getStartTime();
+            if (startObj == null) startObj = event.getEventDateTime(); // Fallback
+
+            if (startObj != null) {
+                if (startObj instanceof com.google.firebase.Timestamp) {
+                    dateToFormat = ((com.google.firebase.Timestamp) startObj).toDate();
+                } else if (startObj instanceof Date) {
+                    dateToFormat = (Date) startObj;
+                }
             }
 
-            // 4. Ubicación
-            tvLocation.setText(event.getPlaceName());
+            if (dateToFormat != null) {
+                dateText = dateFormat.format(dateToFormat);
+            }
+            tvDate.setText(dateText);
 
-            // 5. Participantes
-            // Nota: Usamos los métodos Exclude que creamos en el modelo para lógica,
-            // o los getters directos para mostrar datos crudos.
+            // Ubicación y Participantes
+            tvLocation.setText(event.getPlaceName());
             int current = event.getCurrentParticipants();
             int max = event.getMaxQuota();
             tvParticipants.setText(current + "/" + max);
 
-            // 6. Estado (Colores)
-            String status = event.getStatus();
+            // Estado Visual
+            // Nota: Podrías usar event.getTimeStatus() aquí, pero la lógica visual actual funciona
+            setStatusVisual("DISPONIBLE", 0xFFE8F5E9, R.color.green_primary); // Default
 
-            if ("LLENO".equals(status) || (event.getMaxQuota() > 0 && current >= max)) {
-                tvStatus.setText("LLENO");
-                if(cardStatus != null) cardStatus.setCardBackgroundColor(ContextCompat.getColor(context, R.color.red_light));
-                tvStatus.setTextColor(ContextCompat.getColor(context, R.color.red_error));
+            // Imagen
+            if (event.getImageUrls() != null && !event.getImageUrls().isEmpty()) {
+                Glide.with(context)
+                        .load(event.getImageUrls().get(0))
+                        .centerCrop()
+                        .placeholder(R.drawable.ic_calendar)
+                        .into(ivThumbnail);
+                ivThumbnail.setPadding(0,0,0,0);
+                ivThumbnail.setColorFilter(null);
+            } else {
+                ivThumbnail.setImageResource(R.drawable.ic_trophy); // Asegúrate de tener ic_trophy o cambia a ic_calendar
+                ivThumbnail.setColorFilter(ContextCompat.getColor(context, R.color.green_primary));
+                ivThumbnail.setPadding(25,25,25,25);
+                ivThumbnail.setBackgroundColor(ContextCompat.getColor(context, R.color.card_surface_color));
             }
-            else if ("CANCELADO".equals(status)) {
-                tvStatus.setText("CANCELADO");
-                if(cardStatus != null) cardStatus.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gray_light));
-                tvStatus.setTextColor(ContextCompat.getColor(context, R.color.gray_dark));
-            }
-            else {
-                tvStatus.setText("DISPONIBLE");
-                // Usamos un verde claro o el color por defecto si no hay green_light
-                // Aquí asumo que podrías no tener green_light, así que uso un hex seguro o white
-                if(cardStatus != null) cardStatus.setCardBackgroundColor(0xFFE8F5E9); // Verde muy claro hex
-                tvStatus.setTextColor(ContextCompat.getColor(context, R.color.green_primary));
-            }
+        }
+
+        private void setStatusVisual(String text, int bgColor, int textColorRes) {
+            tvStatus.setText(text);
+            if (bgColor == 0xFFE8F5E9) cardStatus.setCardBackgroundColor(bgColor);
+            else cardStatus.setCardBackgroundColor(ContextCompat.getColor(context, bgColor));
+            tvStatus.setTextColor(ContextCompat.getColor(context, textColorRes));
         }
     }
 }

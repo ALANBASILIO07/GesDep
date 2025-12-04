@@ -18,9 +18,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="Nuevo Evento"
+            app:title="Editar Evento"
             app:titleTextColor="@color/white"
-            app:navigationIcon="@drawable/ic_arrow_black"
+            app:navigationIcon="@drawable/abc_ic_ab_back_material"
             app:navigationIconTint="@color/white"/>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -126,7 +126,6 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="none"
-                            android:text="Deportivo"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
                     <com.google.android.material.textfield.TextInputLayout
@@ -247,12 +246,6 @@
                             android:inputType="none"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="* Ubicación GPS automática según sede"
-                        android:textSize="11sp"
-                        android:textColor="@color/text_secondary_color"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -308,7 +301,6 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number"
-                                android:text="2"
                                 android:textColor="@color/text_primary_color"/>
                         </com.google.android.material.textfield.TextInputLayout>
                         <com.google.android.material.textfield.TextInputLayout
@@ -401,7 +393,7 @@
                 style="@style/DashboardTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Imagen Principal"
+                android:text="Imagen Principal (Toca para cambiar)"
                 android:textColor="@color/green_primary"
                 android:textAlignment="viewStart"
                 android:layout_marginBottom="8dp"/>
@@ -411,7 +403,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 style="@style/DashboardCardStyle"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="32dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
@@ -439,55 +431,18 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Toca para añadir portada"
+                            android:text="Cambiar Portada"
                             android:textColor="@color/text_secondary_color"
                             android:layout_marginTop="8dp"/>
                     </LinearLayout>
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                style="@style/DashboardTextStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Galería Adicional (Máx 5)"
-                android:textColor="@color/green_primary"
-                android:textAlignment="viewStart"
-                android:layout_marginBottom="8dp"/>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/DashboardCardStyle"
-                android:layout_marginBottom="32dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnAddPhotos"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Agregar Fotos"
-                        app:icon="@drawable/ic_camera"
-                        android:backgroundTint="@color/blue_button"
-                        android:layout_marginBottom="8dp"/>
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvEventImages"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="8dp"
-                        android:minHeight="100dp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPublishEvent"
+                android:id="@+id/btnSaveChanges"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:text="PUBLICAR EVENTO"
+                android:text="GUARDAR CAMBIOS"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:cornerRadius="8dp"
