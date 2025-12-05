@@ -4,23 +4,23 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp">
-
-    <TextView
-        android:id="@+id/tvPaymentTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Simulación de Pago"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="@color/green_primary"
-        android:layout_marginBottom="8dp"/>
+    android:padding="24dp"
+    android:background="?attr/colorSurface"> <TextView
+    android:id="@+id/tvPaymentTitle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Simulación de Pago"
+    android:textSize="20sp"
+    android:textStyle="bold"
+    android:textColor="@color/green_primary"
+    android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/tvPaymentMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Este evento requiere un pago o donativo."
+        android:textColor="?android:attr/textColorSecondary"
         android:layout_marginBottom="16dp"/>
 
     <TextView
@@ -28,8 +28,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Total a pagar: $500.00"
-        android:textSize="18sp"
+        android:textSize="24sp"
         android:textStyle="bold"
+        android:textColor="?android:attr/textColorPrimary"
         android:gravity="center"
         android:layout_marginBottom="16dp"/>
 

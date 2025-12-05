@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth; // IMPORTANTE
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -32,7 +32,7 @@ public class ParticipantsActivity extends AppCompatActivity {
     private ParticipantAdapter adapter;
     private List<UserModel> userList;
     private FirebaseFirestore db;
-    private FirebaseAuth auth; // Para obtener el usuario actual
+    private FirebaseAuth auth;
     private FloatingActionButton fabAddParticipant;
     private MaterialToolbar toolbar;
 
@@ -44,7 +44,7 @@ public class ParticipantsActivity extends AppCompatActivity {
         WindowUtils.setGreenStatusBar(this);
 
         db = FirebaseFirestore.getInstance("gesdep");
-        auth = FirebaseAuth.getInstance(); // Inicializar Auth
+        auth = FirebaseAuth.getInstance();
         userList = new ArrayList<>();
 
         initViews();
@@ -92,7 +92,7 @@ public class ParticipantsActivity extends AppCompatActivity {
     }
 
     private void loadUsers() {
-        String currentUserId = auth.getUid(); // ID del usuario actual
+        String currentUserId = auth.getUid();
 
         db.collection("users")
                 .orderBy("name", Query.Direction.ASCENDING)
@@ -104,7 +104,7 @@ public class ParticipantsActivity extends AppCompatActivity {
 
                             // --- FILTRO: Ocultar al usuario en sesión ---
                             if (currentUserId != null && currentUserId.equals(doc.getId())) {
-                                continue; // Salta esta iteración, no lo agrega a la lista
+                                continue;
                             }
                             // ---------------------------------------------
 
@@ -114,7 +114,6 @@ public class ParticipantsActivity extends AppCompatActivity {
                             }
                         }
                         adapter.updateUsers(userList);
-                        // Ajustamos el empty state considerando si la lista quedó vacía tras el filtro
                         toggleEmptyState(userList.isEmpty());
                     } else {
                         adapter.updateUsers(new ArrayList<>());
@@ -128,19 +127,29 @@ public class ParticipantsActivity extends AppCompatActivity {
     }
 
     private UserModel mapSnapshotToUserModel(DocumentSnapshot doc) {
+        // Intento primario con mapeo manual para máxima seguridad y evitar crashes
         UserModel model = new UserModel();
-        model.setUid(doc.getId());
-        model.setName(doc.getString("name"));
-        model.setEmail(doc.getString("email"));
-        model.setRole(doc.getString("role"));
-        model.setPhone(doc.getString("phone"));
-        model.setProfilePhotoUrl(doc.getString("photoUrl"));
+        try {
+            model.setUid(doc.getId());
+            model.setName(doc.getString("name"));
+            model.setEmail(doc.getString("email"));
+            model.setRole(doc.getString("role"));
+            model.setPhone(doc.getString("phone"));
 
-        Object createdObj = doc.get("createdAt");
-        if (createdObj instanceof Long) {
-            model.setCreatedAt(new Date((Long) createdObj));
-        } else if (createdObj instanceof Timestamp) {
-            model.setCreatedAt(((Timestamp) createdObj).toDate());
+            // Prioridad a photoUrl, fallback a profilePhotoUrl
+            String photo = doc.getString("photoUrl");
+            if (photo == null) photo = doc.getString("profilePhotoUrl");
+            model.setProfilePhotoUrl(photo);
+
+            Object createdObj = doc.get("createdAt");
+            if (createdObj instanceof Long) {
+                model.setCreatedAt(new Date((Long) createdObj));
+            } else if (createdObj instanceof Timestamp) {
+                model.setCreatedAt(((Timestamp) createdObj).toDate());
+            }
+        } catch (Exception e) {
+            // Silenciosamente fallamos o loggeamos, pero no mostramos Toast al usuario
+            // Log.e("MappingError", "Error mapping user: " + e.getMessage());
         }
         return model;
     }
