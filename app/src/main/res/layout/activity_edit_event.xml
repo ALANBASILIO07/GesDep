@@ -175,7 +175,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
-
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -191,7 +190,6 @@
                             android:drawableEnd="@drawable/ic_calendar"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -230,7 +228,6 @@
                                 android:textColor="@color/text_primary_color"/>
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
-
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -268,7 +265,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
-
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -284,7 +280,6 @@
                             android:drawableEnd="@drawable/ic_calendar"
                             android:textColor="@color/text_primary_color"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -340,7 +335,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
-
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switchPaidEvent"
                         android:layout_width="match_parent"
@@ -350,14 +344,12 @@
                         android:textColor="@color/text_primary_color"
                         android:checked="false"
                         android:layout_marginBottom="12dp"/>
-
                     <LinearLayout
                         android:id="@+id/containerPaymentDetails"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:visibility="gone">
-
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -371,7 +363,6 @@
                                 android:inputType="none"
                                 android:textColor="@color/text_primary_color"/>
                         </com.google.android.material.textfield.TextInputLayout>
-
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -393,7 +384,7 @@
                 style="@style/DashboardTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Imagen Principal (Toca para cambiar)"
+                android:text="Imagen Principal"
                 android:textColor="@color/green_primary"
                 android:textAlignment="viewStart"
                 android:layout_marginBottom="8dp"/>
@@ -403,7 +394,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 style="@style/DashboardCardStyle"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="24dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground">
@@ -436,6 +427,43 @@
                             android:layout_marginTop="8dp"/>
                     </LinearLayout>
                 </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                style="@style/DashboardTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Galería Adicional (Máx 5)"
+                android:textColor="@color/green_primary"
+                android:textAlignment="viewStart"
+                android:layout_marginBottom="8dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/DashboardCardStyle"
+                android:layout_marginBottom="32dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddPhotos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Agregar / Cambiar Fotos"
+                        app:icon="@drawable/ic_camera"
+                        android:backgroundTint="@color/blue_button"
+                        android:layout_marginBottom="8dp"/>
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvEventImages"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp"
+                        android:minHeight="100dp"/>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.button.MaterialButton

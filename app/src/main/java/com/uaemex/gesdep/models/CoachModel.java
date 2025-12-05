@@ -1,4 +1,4 @@
-package com.uaemex.gesdep;
+package com.uaemex.gesdep.models;
 
 public class CoachModel {
     private String id;

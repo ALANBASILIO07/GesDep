@@ -1,4 +1,4 @@
-package com.uaemex.gesdep;
+package com.uaemex.gesdep.adapters;
 
 public class ActivityModel {
     public String id;

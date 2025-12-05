@@ -1,73 +1,85 @@
 package com.uaemex.gesdep;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import android.util.Log; // Agregado para logs de diagnóstico
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.uaemex.gesdep.models.EventModel;
 import com.uaemex.gesdep.models.VenueModel;
+import com.uaemex.gesdep.utils.NotificationHelper;
 import com.uaemex.gesdep.utils.WindowUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 public class EditEventActivity extends AppCompatActivity {
 
-    // UI Components
     private TextInputEditText etTitle, etMacroEvent, etDescription, etMinQuota, etMaxQuota;
     private TextInputEditText etDate, etStartTime, etEndTime, etDeadlineDate;
     private SwitchMaterial switchPaidEvent;
     private LinearLayout containerPaymentDetails;
     private AutoCompleteTextView dropdownPaymentType, dropdownCategory, dropdownDiscipline, dropdownModality, dropdownVenue;
     private TextInputEditText etCost;
-    private MaterialButton btnSaveChanges;
+    private MaterialButton btnSaveChanges, btnAddPhotos;
     private MaterialCardView btnSelectImage;
     private ImageView ivEventImage;
     private LinearLayout layoutImagePlaceholder;
     private View loadingOverlay;
+    private RecyclerView rvEventImages;
 
-    // Dates Helpers
     private Calendar calendarEventDate = Calendar.getInstance();
     private Calendar calendarStartTime = Calendar.getInstance();
     private Calendar calendarEndTime = Calendar.getInstance();
     private Calendar calendarDeadline = Calendar.getInstance();
 
-    // Data
     private List<VenueModel> venueList = new ArrayList<>();
     private VenueModel selectedVenue = null;
     private EventModel currentEvent;
+    private String originalVenueName;
+    private Date originalStartTime;
 
-    // Multimedia
     private Uri newMainImageUri = null;
     private List<String> currentImageUrls = new ArrayList<>();
+    private List<Object> galleryItems = new ArrayList<>(); // Para mezcla de String (URL) y Uri (Local)
+    private GalleryEditAdapter galleryAdapter;
 
-    // Firebase
     private FirebaseFirestore db;
     private FirebaseStorage storage;
+    private NotificationHelper notificationHelper;
 
     private final ActivityResultLauncher<Intent> bannerLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -78,28 +90,45 @@ public class EditEventActivity extends AppCompatActivity {
                 }
             });
 
+    private final ActivityResultLauncher<Intent> galleryPickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    if (result.getData().getClipData() != null) {
+                        int count = result.getData().getClipData().getItemCount();
+                        for (int i = 0; i < count; i++) {
+                            if (galleryItems.size() < 5) galleryItems.add(result.getData().getClipData().getItemAt(i).getUri());
+                        }
+                    } else if (result.getData().getData() != null) {
+                        if (galleryItems.size() < 5) galleryItems.add(result.getData().getData());
+                    }
+                    galleryAdapter.notifyDataSetChanged();
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_event);
-
         WindowUtils.setGreenStatusBar(this);
 
         db = FirebaseFirestore.getInstance("gesdep");
         storage = FirebaseStorage.getInstance();
+        notificationHelper = new NotificationHelper();
 
         initViews();
         setupDropdowns();
         setupListeners();
+        setupRecyclerView();
 
-        // 1. RECUPERAR EL EVENTO A EDITAR
         if (getIntent().hasExtra("eventModel")) {
             currentEvent = (EventModel) getIntent().getSerializableExtra("eventModel");
             if (currentEvent != null) {
+                originalVenueName = currentEvent.getPlaceName();
+                originalStartTime = currentEvent.getStartTime();
+                checkEmergencyLock();
                 loadVenuesAndFillData();
             }
         } else {
-            Toast.makeText(this, "Error: No se recibió el evento", Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -110,29 +139,50 @@ public class EditEventActivity extends AppCompatActivity {
         etDescription = findViewById(R.id.etDescription);
         etMinQuota = findViewById(R.id.etMinQuota);
         etMaxQuota = findViewById(R.id.etMaxQuota);
-
         etDate = findViewById(R.id.etDate);
         etStartTime = findViewById(R.id.etStartTime);
         etEndTime = findViewById(R.id.etEndTime);
         etDeadlineDate = findViewById(R.id.etDeadlineDate);
-
         dropdownCategory = findViewById(R.id.dropdownCategory);
         dropdownDiscipline = findViewById(R.id.dropdownDiscipline);
         dropdownModality = findViewById(R.id.dropdownModality);
         dropdownVenue = findViewById(R.id.dropdownVenue);
-
         switchPaidEvent = findViewById(R.id.switchPaidEvent);
         containerPaymentDetails = findViewById(R.id.containerPaymentDetails);
         dropdownPaymentType = findViewById(R.id.dropdownPaymentType);
         etCost = findViewById(R.id.etCost);
-
         btnSelectImage = findViewById(R.id.btnSelectImage);
         ivEventImage = findViewById(R.id.ivEventImage);
         layoutImagePlaceholder = findViewById(R.id.layoutImagePlaceholder);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
+        btnAddPhotos = findViewById(R.id.btnAddPhotos);
+        rvEventImages = findViewById(R.id.rvEventImages);
         loadingOverlay = findViewById(R.id.loadingOverlay);
-
         findViewById(R.id.toolbar).setOnClickListener(v -> finish());
+    }
+
+    private void setupRecyclerView() {
+        galleryAdapter = new GalleryEditAdapter(galleryItems);
+        rvEventImages.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvEventImages.setAdapter(galleryAdapter);
+    }
+
+    private void checkEmergencyLock() {
+        long now = System.currentTimeMillis();
+        long eventStart = currentEvent.getStartTime() != null ? currentEvent.getStartTime().getTime() : 0;
+        if (eventStart > now && (eventStart - now) < 3600000) {
+            disableFormInputs();
+            Toast.makeText(this, "⚠️ A menos de 1h del evento, la edición está bloqueada.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void disableFormInputs() {
+        etTitle.setEnabled(false);
+        etDescription.setEnabled(false);
+        dropdownVenue.setEnabled(false);
+        etDate.setEnabled(false);
+        etStartTime.setEnabled(false);
+        dropdownCategory.setEnabled(false);
     }
 
     private void setupDropdowns() {
@@ -173,12 +223,11 @@ public class EditEventActivity extends AppCompatActivity {
         etDescription.setText(currentEvent.getDescription());
         etMinQuota.setText(String.valueOf(currentEvent.getMinQuota()));
         etMaxQuota.setText(String.valueOf(currentEvent.getMaxQuota()));
-
         dropdownCategory.setText(currentEvent.getCategory(), false);
         dropdownDiscipline.setText(currentEvent.getDiscipline(), false);
         dropdownModality.setText(currentEvent.getModality(), false);
-
         dropdownVenue.setText(currentEvent.getPlaceName(), false);
+
         for (VenueModel v : venueList) {
             if (v.getName().equals(currentEvent.getPlaceName())) {
                 selectedVenue = v;
@@ -192,12 +241,10 @@ public class EditEventActivity extends AppCompatActivity {
             updateDateText(etDate, calendarEventDate);
             updateTimeText(etStartTime, calendarStartTime);
         }
-
         if (currentEvent.getEndTime() != null) {
             calendarEndTime.setTime(currentEvent.getEndTime());
             updateTimeText(etEndTime, calendarEndTime);
         }
-
         if (currentEvent.getRegistrationDeadline() != null) {
             calendarDeadline.setTime(currentEvent.getRegistrationDeadline());
             updateDateText(etDeadlineDate, calendarDeadline);
@@ -216,12 +263,21 @@ public class EditEventActivity extends AppCompatActivity {
         if (currentImageUrls != null && !currentImageUrls.isEmpty()) {
             Glide.with(this).load(currentImageUrls.get(0)).centerCrop().into(ivEventImage);
             layoutImagePlaceholder.setVisibility(View.GONE);
+
+            // Llenar Galería (Saltando el index 0 que es el banner)
+            if (currentImageUrls.size() > 1) {
+                for (int i = 1; i < currentImageUrls.size(); i++) {
+                    galleryItems.add(currentImageUrls.get(i));
+                }
+                galleryAdapter.notifyDataSetChanged();
+            }
         }
     }
 
     private void updateDateText(TextInputEditText et, Calendar cal) {
         et.setText(cal.get(Calendar.DAY_OF_MONTH) + "/" + (cal.get(Calendar.MONTH) + 1) + "/" + cal.get(Calendar.YEAR));
     }
+
     private void updateTimeText(TextInputEditText et, Calendar cal) {
         et.setText(String.format("%02d:%02d", cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE)));
     }
@@ -249,6 +305,12 @@ public class EditEventActivity extends AppCompatActivity {
         btnSelectImage.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             bannerLauncher.launch(intent);
+        });
+
+        btnAddPhotos.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            galleryPickerLauncher.launch(intent);
         });
 
         btnSaveChanges.setOnClickListener(v -> validateAndUpdateEvent());
@@ -280,34 +342,62 @@ public class EditEventActivity extends AppCompatActivity {
             return;
         }
 
+        String newVenueName = dropdownVenue.getText().toString();
+        copyDateToTime(calendarEventDate, calendarStartTime);
+        Date newStartDate = calendarStartTime.getTime();
+
+        if (originalVenueName != null && !newVenueName.equals(originalVenueName)) {
+            long diff = Math.abs(newStartDate.getTime() - originalStartTime.getTime());
+            if (diff < 1000) {
+                Toast.makeText(this, "⚠️ REGLA: Si cambias la sede, DEBES cambiar el horario.", Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
+        long now = System.currentTimeMillis();
+        if (originalStartTime != null && originalStartTime.getTime() > now && (originalStartTime.getTime() - now) < 3600000) {
+            Toast.makeText(this, "No se pueden guardar cambios a menos de 1h del evento.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         loadingOverlay.setVisibility(View.VISIBLE);
         btnSaveChanges.setEnabled(false);
 
-        if (newMainImageUri != null) {
-            uploadNewImageAndUpdate();
+        // Preparar carga de imágenes
+        List<Uri> newImagesToUpload = new ArrayList<>();
+        List<String> existingUrls = new ArrayList<>();
+
+        // 1. Banner
+        if (newMainImageUri != null) newImagesToUpload.add(newMainImageUri);
+        else if (!currentImageUrls.isEmpty()) existingUrls.add(currentImageUrls.get(0));
+
+        // 2. Galería
+        for (Object item : galleryItems) {
+            if (item instanceof Uri) newImagesToUpload.add((Uri) item);
+            else if (item instanceof String) existingUrls.add((String) item);
+        }
+
+        if (!newImagesToUpload.isEmpty()) {
+            uploadImagesRecursive(newImagesToUpload, 0, existingUrls);
         } else {
-            updateEventInFirestore(currentImageUrls);
+            updateEventInFirestore(existingUrls);
         }
     }
 
-    private void uploadNewImageAndUpdate() {
+    private void uploadImagesRecursive(List<Uri> uris, int index, List<String> finalUrls) {
+        if (index >= uris.size()) {
+            updateEventInFirestore(finalUrls);
+            return;
+        }
         String filename = UUID.randomUUID().toString() + ".jpg";
         StorageReference ref = storage.getReference().child("events/" + filename);
 
-        ref.putFile(newMainImageUri)
+        ref.putFile(uris.get(index))
                 .addOnSuccessListener(task -> ref.getDownloadUrl().addOnSuccessListener(uri -> {
-                    List<String> newUrls = new ArrayList<>();
-                    newUrls.add(uri.toString());
-                    if (currentImageUrls.size() > 1) {
-                        newUrls.addAll(currentImageUrls.subList(1, currentImageUrls.size()));
-                    }
-                    updateEventInFirestore(newUrls);
+                    finalUrls.add(uri.toString());
+                    uploadImagesRecursive(uris, index + 1, finalUrls);
                 }))
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error subiendo imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    loadingOverlay.setVisibility(View.GONE);
-                    btnSaveChanges.setEnabled(true);
-                });
+                .addOnFailureListener(e -> uploadImagesRecursive(uris, index + 1, finalUrls));
     }
 
     private void updateEventInFirestore(List<String> imageUrls) {
@@ -328,9 +418,35 @@ public class EditEventActivity extends AppCompatActivity {
         copyDateToTime(calendarEventDate, calendarStartTime);
         copyDateToTime(calendarEventDate, calendarEndTime);
 
-        currentEvent.setStartTime(calendarStartTime.getTime());
+        Date newStart = calendarStartTime.getTime();
+        Date now = new Date();
+
+        // --- FIX DE INTEGRIDAD DE ESTADOS ---
+        String statusFromDB = currentEvent.getStatus();
+
+        // 1. Si el evento es futuro (y no está cancelado), re-establecer a PENDIENTE/CONFIRMADO
+        if (newStart.after(now)) {
+            // Si el estado actual de la DB no es CANCELADO, no debe ser FINALIZADO o EN VIVO.
+            if (!"CANCELADO".equalsIgnoreCase(statusFromDB)) {
+                // Si se cumplen los requisitos mínimos, se puede forzar a CONFIRMADO, sino PENDIENTE.
+                if (currentEvent.getCurrentParticipants() >= currentEvent.getMinQuota()) {
+                    currentEvent.setStatus("CONFIRMADO");
+                } else {
+                    currentEvent.setStatus("PENDIENTE");
+                }
+            }
+            // Si estaba cancelado, mantener cancelado, excepto si la lógica de reactivación es manual (toggleCancellationStatus)
+        }
+        // 2. Si el evento ya pasó, marcar como FINALIZADO.
+        else if (calendarEndTime.getTime().before(now)) {
+            currentEvent.setStatus("FINALIZADO");
+        }
+        // 3. Si ya está en rango, ActivityEventDetail lo actualizará a EN VIVO al ser visto (persistencia).
+        // Mantenemos el estado actual si es EN VIVO o CONFIRMADO (aunque CONFIRMADO es mejor si no ha pasado la hora de inicio).
+
+        currentEvent.setStartTime(newStart);
         currentEvent.setEndTime(calendarEndTime.getTime());
-        currentEvent.setEventDateTime(calendarStartTime.getTime());
+        currentEvent.setEventDateTime(newStart);
 
         if (!etDeadlineDate.getText().toString().isEmpty()) {
             calendarDeadline.set(Calendar.HOUR_OF_DAY, 23);
@@ -359,20 +475,18 @@ public class EditEventActivity extends AppCompatActivity {
                 .set(currentEvent)
                 .addOnSuccessListener(aVoid -> {
                     loadingOverlay.setVisibility(View.GONE);
-                    Toast.makeText(this, "Evento Actualizado Correctamente", Toast.LENGTH_SHORT).show();
+                    String msg = "El evento '" + currentEvent.getTitle() + "' ha sido actualizado.";
+                    notificationHelper.notifyEventParticipants(currentEvent.getId(), "Evento Actualizado", msg);
 
-                    // --- CAMBIO CLAVE AQUÍ ---
-                    // Devolvemos el evento actualizado a la actividad padre para refrescar la UI al instante
                     Intent resultIntent = new Intent();
                     resultIntent.putExtra("updatedEvent", currentEvent);
                     setResult(RESULT_OK, resultIntent);
                     finish();
-                    // --------------------------
                 })
                 .addOnFailureListener(e -> {
                     loadingOverlay.setVisibility(View.GONE);
                     btnSaveChanges.setEnabled(true);
-                    Toast.makeText(this, "Error al guardar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error al guardar", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -380,5 +494,30 @@ public class EditEventActivity extends AppCompatActivity {
         targetTime.set(Calendar.YEAR, sourceDate.get(Calendar.YEAR));
         targetTime.set(Calendar.MONTH, sourceDate.get(Calendar.MONTH));
         targetTime.set(Calendar.DAY_OF_MONTH, sourceDate.get(Calendar.DAY_OF_MONTH));
+    }
+
+    class GalleryEditAdapter extends RecyclerView.Adapter<GalleryEditAdapter.ViewHolder> {
+        private List<Object> items;
+        public GalleryEditAdapter(List<Object> items) { this.items = items; }
+
+        @NonNull @Override public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ImageView iv = new ImageView(parent.getContext());
+            iv.setLayoutParams(new ViewGroup.LayoutParams(250, 250));
+            iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            iv.setPadding(8, 8, 8, 8);
+            return new ViewHolder(iv);
+        }
+
+        @Override public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            Object item = items.get(position);
+            Glide.with(holder.itemView.getContext()).load(item).into((ImageView) holder.itemView);
+            holder.itemView.setOnLongClickListener(v -> {
+                items.remove(position);
+                notifyItemRemoved(position);
+                return true;
+            });
+        }
+        @Override public int getItemCount() { return items.size(); }
+        class ViewHolder extends RecyclerView.ViewHolder { public ViewHolder(View v) { super(v); } }
     }
 }

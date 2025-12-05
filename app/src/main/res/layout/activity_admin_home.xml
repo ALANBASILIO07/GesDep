@@ -111,6 +111,46 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
+                    android:layout_marginBottom="24dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardCurrentCredit"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        app:cardBackgroundColor="@color/green_primary"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="4dp"
+                        style="@style/DashboardCardStyle">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="20dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="SALDO DE LA CUENTA"
+                                android:textColor="@color/white"
+                                android:textSize="14sp"/>
+                            <TextView
+                                android:id="@+id/tvCurrentCredit"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/white"
+                                android:textSize="32sp"
+                                android:textStyle="bold"
+                                tools:text="$0.00 MXN"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
                     android:baselineAligned="false"
                     android:layout_marginBottom="8dp">
 
@@ -266,6 +306,19 @@
                     android:layout_marginBottom="12dp"/>
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnQuickRecharge"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="RECARGAR SALDO"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:icon="@drawable/ic_attach_money"
+                    app:iconGravity="textStart"
+                    app:cornerRadius="12dp"
+                    android:backgroundTint="@color/blue_button"
+                    android:layout_marginBottom="12dp"/>
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnQuickMessage"
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
@@ -275,7 +328,7 @@
                     app:icon="@drawable/ic_mail"
                     app:iconGravity="textStart"
                     app:cornerRadius="12dp"
-                    android:backgroundTint="@color/blue_button"
+                    android:backgroundTint="@color/orange_dark"
                     android:layout_marginBottom="24dp"/>
 
                 <TextView

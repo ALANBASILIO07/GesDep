@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="false"
-    android:background="@color/screen_background_color">
+    android:background="?android:attr/colorBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -75,7 +75,7 @@
                 tools:text="Torneo de Fútbol"
                 android:textSize="26sp"
                 android:textStyle="bold"
-                android:textColor="@color/text_primary_color"
+                android:textColor="?android:attr/textColorPrimary"
                 android:layout_marginBottom="12dp"/>
 
             <com.google.android.material.chip.ChipGroup
@@ -106,7 +106,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     tools:text="Fútbol"
-                    app:chipBackgroundColor="@color/card_surface_color"
+                    style="@style/Widget.MaterialComponents.Chip.Entry"
                     android:clickable="false"/>
 
                 <com.google.android.material.chip.Chip
@@ -115,62 +115,72 @@
                     android:layout_height="wrap_content"
                     tools:text="Gratuito"
                     app:chipIcon="@drawable/ic_attach_money"
-                    app:chipBackgroundColor="@color/card_surface_color"
+                    style="@style/Widget.MaterialComponents.Chip.Entry"
                     android:clickable="false"/>
             </com.google.android.material.chip.ChipGroup>
 
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_rounded_border_grey"
-                android:padding="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#33808080"
+                app:cardBackgroundColor="?attr/colorSurface"
                 android:layout_marginBottom="24dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <TextView
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Disponibilidad"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:textColor="@color/text_primary_color"/>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
 
-                    <TextView
-                        android:id="@+id/tvParticipantsCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="15 / 20 inscritos"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/green_primary"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Disponibilidad"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="?android:attr/textColorPrimary"/>
+
+                        <TextView
+                            android:id="@+id/tvParticipantsCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="15 / 20 inscritos"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/green_primary"/>
+                    </LinearLayout>
+
+                    <ProgressBar
+                        android:id="@+id/pbQuota"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="12dp"
+                        android:max="100"
+                        android:progress="75"
+                        android:progressDrawable="@drawable/custom_progress_bar"
+                        android:progressTint="@color/green_primary"
+                        android:progressBackgroundTint="#40808080"/>
                 </LinearLayout>
-
-                <ProgressBar
-                    android:id="@+id/pbQuota"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="12dp"
-                    android:max="100"
-                    android:progress="75"
-                    android:progressDrawable="@drawable/custom_progress_bar"
-                    android:progressTint="@color/green_primary"/>
-            </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
+                app:cardElevation="4dp"
                 app:strokeWidth="0dp"
-                app:cardBackgroundColor="@color/white"
+                app:cardBackgroundColor="?attr/colorSurface"
                 android:layout_marginBottom="24dp">
 
                 <LinearLayout
@@ -203,14 +213,14 @@
                                 tools:text="Viernes, 20 Oct"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/text_primary_color"/>
+                                android:textColor="?android:attr/textColorPrimary"/>
                             <TextView
                                 android:id="@+id/tvEventTime"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 tools:text="10:00 AM - 12:00 PM"
                                 android:textSize="14sp"
-                                android:textColor="@color/text_secondary_color"/>
+                                android:textColor="?android:attr/textColorSecondary"/>
                         </LinearLayout>
                     </LinearLayout>
 
@@ -238,14 +248,14 @@
                                 tools:text="$500.00 MXN"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/green_dark"/>
+                                android:textColor="@color/green_primary"/>
                             <TextView
                                 android:id="@+id/tvCostConcept"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 tools:text="Arbitraje por equipo"
                                 android:textSize="14sp"
-                                android:textColor="@color/text_secondary_color"/>
+                                android:textColor="?android:attr/textColorSecondary"/>
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
@@ -257,7 +267,7 @@
                 android:text="Descripción"
                 android:textStyle="bold"
                 android:textSize="20sp"
-                android:textColor="@color/text_primary_color"
+                android:textColor="?android:attr/textColorPrimary"
                 android:layout_marginBottom="8dp"/>
 
             <TextView
@@ -267,8 +277,29 @@
                 tools:text="Detalles..."
                 android:lineSpacingExtra="6dp"
                 android:textSize="16sp"
-                android:textColor="@color/text_secondary_color"
+                android:textColor="?android:attr/textColorSecondary"
                 android:layout_marginBottom="24dp"/>
+
+            <TextView
+                android:id="@+id/tvGalleryLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Galería"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvEventGallery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp"
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -276,7 +307,7 @@
                 android:text="Ubicación"
                 android:textStyle="bold"
                 android:textSize="20sp"
-                android:textColor="@color/text_primary_color"
+                android:textColor="?android:attr/textColorPrimary"
                 android:layout_marginBottom="12dp"/>
 
             <TextView
@@ -285,7 +316,7 @@
                 android:layout_height="wrap_content"
                 tools:text="Estadio"
                 android:textSize="16sp"
-                android:textColor="@color/text_secondary_color"
+                android:textColor="?android:attr/textColorSecondary"
                 android:layout_marginBottom="16dp"/>
 
             <androidx.cardview.widget.CardView

@@ -1,6 +1,8 @@
 package com.uaemex.gesdep.adapters;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +38,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     public EventsAdapter(OnEventClickListener listener) {
         this.events = new ArrayList<>();
         this.listener = listener;
-        this.dateFormat = new SimpleDateFormat("dd MMM, HH:mm", new Locale("es", "MX"));
+        this.dateFormat = new SimpleDateFormat("EEE, d MMM, hh:mm a", new Locale("es", "MX"));
     }
 
     @NonNull
@@ -66,6 +68,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
 
     class EventViewHolder extends RecyclerView.ViewHolder {
 
+        // Variables de la vista
         private TextView tvTitle, tvCategory, tvDate, tvLocation, tvParticipants, tvStatus;
         private MaterialCardView cardStatus;
         private ImageView ivThumbnail;
@@ -90,28 +93,18 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         }
 
         public void bind(EventModel event) {
+            Context context = itemView.getContext();
+
             tvTitle.setText(event.getTitle());
 
             // Categoría
             String discipline = event.getDiscipline() != null ? event.getDiscipline() : "General";
             String modality = event.getModality() != null ? event.getModality() : "";
-            tvCategory.setText(discipline + (modality.isEmpty() ? "" : " • " + modality));
+            tvCategory.setText(discipline.toUpperCase() + (modality.isEmpty() ? "" : " • " + modality.toUpperCase()));
 
-            // Fecha (Lógica BLINDADA)
+            // Fecha
             String dateText = "Por definir";
-            Date dateToFormat = null;
-
-            // Intentar obtener la fecha de inicio (puede ser Timestamp o Date)
-            Object startObj = event.getStartTime();
-            if (startObj == null) startObj = event.getEventDateTime(); // Fallback
-
-            if (startObj != null) {
-                if (startObj instanceof com.google.firebase.Timestamp) {
-                    dateToFormat = ((com.google.firebase.Timestamp) startObj).toDate();
-                } else if (startObj instanceof Date) {
-                    dateToFormat = (Date) startObj;
-                }
-            }
+            Date dateToFormat = event.getEventDateTime() != null ? event.getEventDateTime() : event.getStartTime();
 
             if (dateToFormat != null) {
                 dateText = dateFormat.format(dateToFormat);
@@ -124,9 +117,73 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
             int max = event.getMaxQuota();
             tvParticipants.setText(current + "/" + max);
 
-            // Estado Visual
-            // Nota: Podrías usar event.getTimeStatus() aquí, pero la lógica visual actual funciona
-            setStatusVisual("DISPONIBLE", 0xFFE8F5E9, R.color.green_primary); // Default
+            // --- CÓDIGOS DE COLOR ---
+            int redText = Color.parseColor("#F44336");
+            int redBg = Color.parseColor("#33F44336");
+            int strongGreenText = Color.parseColor("#00E676");
+            int strongGreenBg = Color.parseColor("#3300E676");
+            int blueText = Color.parseColor("#2196F3");
+            int blueBg = Color.parseColor("#332196F3");
+            int grayText = Color.parseColor("#9E9E9E");
+            int grayBg = Color.parseColor("#339E9E9E");
+            int defaultBlueBg = Color.parseColor("#332196F3");
+
+            // --- LÓGICA DE PRIORIDAD DE ESTATUS LIMPIA ---
+
+            String dbStatus = event.getStatus();
+            String timeStatus = event.getTimeStatus(); // EN VIVO, FINALIZADO, PENDIENTE
+            String statusToDisplay;
+
+            int finalTextColor;
+            int finalBgColor;
+            boolean isFull = max > 0 && current >= max; // Check capacity once
+
+            // 1. Prioridad Máxima: Estados Críticos o de Tiempo
+            if ("CANCELADO".equalsIgnoreCase(dbStatus)) {
+                statusToDisplay = "CANCELADO";
+                finalBgColor = redBg;
+                finalTextColor = redText;
+            }
+            else if ("EN VIVO".equals(timeStatus)) {
+                statusToDisplay = "EN VIVO";
+                finalBgColor = redBg;
+                finalTextColor = redText;
+            }
+            else if ("FINALIZADO".equals(timeStatus)) {
+                statusToDisplay = "FINALIZADO";
+                finalBgColor = grayBg;
+                finalTextColor = grayText;
+            }
+
+            // 2. Prioridad Media: ESTADO OPERATIVO (CONFIRMADO, PENDIENTE)
+            else if ("CONFIRMADO".equalsIgnoreCase(dbStatus)) {
+                statusToDisplay = "CONFIRMADO";
+                finalBgColor = strongGreenBg;
+                finalTextColor = strongGreenText;
+            }
+            else {
+                // PENDIENTE (o el estado inicial)
+                statusToDisplay = "PENDIENTE";
+                finalBgColor = blueBg;
+                finalTextColor = blueText;
+            }
+
+            // --- APLICAR VISUALIZACIÓN ---
+            // CORRECCIÓN: Acceso directo a tvStatus y cardStatus
+            tvStatus.setText(statusToDisplay);
+            cardStatus.setCardBackgroundColor(ColorStateList.valueOf(finalBgColor));
+            tvStatus.setTextColor(finalTextColor);
+
+            // Advertencia de LLENO: Si está lleno y el badge principal no es CANCELADO/FINALIZADO/EN VIVO,
+            // aplicamos la advertencia al texto de participantes y categoría.
+            if (isFull && !("EN VIVO".equalsIgnoreCase(timeStatus) || "CANCELADO".equalsIgnoreCase(dbStatus) || "FINALIZADO".equalsIgnoreCase(timeStatus))) {
+                tvParticipants.setTextColor(redText); // Advertir en el contador
+                tvCategory.setTextColor(grayText);
+            } else {
+                // Usar color del estado operativo
+                tvCategory.setTextColor(finalTextColor);
+                tvParticipants.setTextColor(ContextCompat.getColor(context, R.color.purple_participants)); // Color original del contador
+            }
 
             // Imagen
             if (event.getImageUrls() != null && !event.getImageUrls().isEmpty()) {
@@ -138,18 +195,11 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
                 ivThumbnail.setPadding(0,0,0,0);
                 ivThumbnail.setColorFilter(null);
             } else {
-                ivThumbnail.setImageResource(R.drawable.ic_trophy); // Asegúrate de tener ic_trophy o cambia a ic_calendar
+                ivThumbnail.setImageResource(R.drawable.ic_trophy);
                 ivThumbnail.setColorFilter(ContextCompat.getColor(context, R.color.green_primary));
                 ivThumbnail.setPadding(25,25,25,25);
                 ivThumbnail.setBackgroundColor(ContextCompat.getColor(context, R.color.card_surface_color));
             }
-        }
-
-        private void setStatusVisual(String text, int bgColor, int textColorRes) {
-            tvStatus.setText(text);
-            if (bgColor == 0xFFE8F5E9) cardStatus.setCardBackgroundColor(bgColor);
-            else cardStatus.setCardBackgroundColor(ContextCompat.getColor(context, bgColor));
-            tvStatus.setTextColor(ContextCompat.getColor(context, textColorRes));
         }
     }
 }

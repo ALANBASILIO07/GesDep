@@ -1,133 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp"
-    app:cardCornerRadius="12dp"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="10dp"
     app:cardElevation="2dp"
-    app:cardBackgroundColor="@color/white"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground">
+    app:cardBackgroundColor="?attr/colorSurface">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="16dp">
-
-        <FrameLayout
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/circle_background">
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_group"
-                app:tint="@color/purple_participants"
-                android:contentDescription="Avatar Participante"/>
-        </FrameLayout>
+        android:orientation="vertical"
+        android:padding="12dp">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp">
+            android:orientation="horizontal"
+            android:layout_marginBottom="6dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_person"
+                android:layout_marginEnd="8dp"
+                app:tint="@color/green_primary"/>
 
             <TextView
                 android:id="@+id/tvParticipantName"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                tools:text="Ana Martínez"
+                android:layout_weight="1"
+                android:textStyle="bold"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/gray_dark"
-                android:maxLines="1"
-                android:ellipsize="end"/>
+                android:textColor="?android:attr/textColorPrimary"
+                tools:text="Juan Pérez López"/>
 
-            <TextView
-                android:id="@+id/tvParticipantActivity"
+            <ImageButton
+                android:id="@+id/btnRemove"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="Fútbol Femenil"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:textColor="@color/purple_participants"
-                android:layout_marginBottom="6dp"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginEnd="12dp">
-
-                    <ImageView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:src="@drawable/ic_person"
-                        app:tint="@color/gray_text"
-                        android:layout_marginEnd="4dp"/>
-
-                    <TextView
-                        android:id="@+id/tvParticipantAge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="18 años"
-                        android:textSize="12sp"
-                        android:textColor="@color/gray_text"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:src="@android:drawable/ic_menu_call"
-                        app:tint="@color/gray_text"
-                        android:layout_marginEnd="4dp"/>
-
-                    <TextView
-                        android:id="@+id/tvParticipantPhone"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="722-123-4567"
-                        android:textSize="12sp"
-                        android:textColor="@color/gray_text"/>
-                </LinearLayout>
-            </LinearLayout>
+                android:src="@drawable/ic_close"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/design_default_color_error"
+                android:padding="4dp"
+                android:visibility="gone"/>
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/btnCallParticipant"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:padding="10dp"
-            android:src="@android:drawable/ic_menu_call"
-            app:tint="@color/green_primary"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:contentDescription="Llamar al participante"/>
+        <TextView
+            android:id="@+id/tvParticipantActivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary"
+            tools:text="Actividad: Fútbol • Torneo"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/tvParticipantAge"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                tools:text="Edad: 25"/>
+
+            <TextView
+                android:id="@+id/tvParticipantPhone"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="14sp"
+                android:textColor="?android:attr/textColorSecondary"
+                tools:text="Tel: 55-5555-5555"/>
+        </LinearLayout>
     </LinearLayout>
-
-</com.google.android.material.card.MaterialCardView>
+</androidx.cardview.widget.CardView>

@@ -31,7 +31,7 @@ import java.util.List;
 public class EventsActivity extends AppCompatActivity implements EventsAdapter.OnEventClickListener {
 
     private MaterialToolbar toolbar;
-    private AutoCompleteTextView filterDiscipline, filterModality, filterVenue, filterStatus; // AGREGADO Status
+    private AutoCompleteTextView filterDiscipline, filterModality, filterVenue, filterStatus;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private View emptyState;
@@ -43,6 +43,7 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+    private boolean isAdmin = false; // Variable para controlar visibilidad
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,15 +58,13 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
         initViews();
         setupToolbar();
         setupRecyclerView();
-        checkUserRole();
+
+        // Primero validamos el rol y LUEGO cargamos los eventos
+        checkUserRoleAndLoad();
 
         repository = new EventRepository();
-
         setupFilters();
         loadVenuesForFilter();
-
-        // Cargar todo una sola vez
-        loadAllEvents();
     }
 
     private void initViews() {
@@ -85,48 +84,52 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
-    private void checkUserRole() {
+    private void checkUserRoleAndLoad() {
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
             db.collection("users").document(user.getUid()).get()
                     .addOnSuccessListener(doc -> {
                         if (doc.exists() && "admin".equals(doc.getString("role"))) {
+                            isAdmin = true;
                             fabAddEvent.setVisibility(View.VISIBLE);
                             fabAddEvent.setOnClickListener(v -> startActivity(new Intent(EventsActivity.this, CreateEventActivity.class)));
                         } else {
+                            isAdmin = false;
                             fabAddEvent.setVisibility(View.GONE);
                         }
+                        // Una vez que sabemos si es admin, cargamos los datos
+                        loadAllEvents();
                     });
         } else {
+            isAdmin = false;
             fabAddEvent.setVisibility(View.GONE);
+            loadAllEvents();
         }
     }
 
     private void setupRecyclerView() {
-        adapter = new EventsAdapter(this);
+        adapter = new EventsAdapter(this); // 'this' funciona porque implementamos la interfaz
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void setupFilters() {
-        // Disciplina
         List<String> disciplines = new ArrayList<>();
         disciplines.add("Todas");
         disciplines.addAll(Arrays.asList(getResources().getStringArray(R.array.event_disciplines)));
         setFilterAdapter(filterDiscipline, disciplines);
 
-        // Modalidad
         List<String> modalities = new ArrayList<>();
         modalities.add("Todas");
         modalities.addAll(Arrays.asList(getResources().getStringArray(R.array.event_modalities)));
         setFilterAdapter(filterModality, modalities);
 
-        // ESTATUS (Nuevo Filtro Manual)
+        // ESTATUS (Nuevo Filtro Manual) - Sin "Activo"
         List<String> statuses = new ArrayList<>();
         statuses.add("Todos");
-        statuses.add("ACTIVO");
         statuses.add("EN VIVO");
         statuses.add("PENDIENTE");
+        statuses.add("CONFIRMADO");
         statuses.add("FINALIZADO");
         statuses.add("CANCELADO");
         setFilterAdapter(filterStatus, statuses);
@@ -147,10 +150,8 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
     private void setFilterAdapter(AutoCompleteTextView view, List<String> data) {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, data);
         view.setAdapter(adapter);
-        // Seleccionar opción por defecto para evitar nulos
         if (view.getId() == R.id.filterStatus) view.setText("Todos", false);
         else view.setText("Todas", false);
-
         view.setOnItemClickListener((parent, v, position, id) -> applyFilters());
     }
 
@@ -178,23 +179,29 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
         String selDisc = filterDiscipline.getText().toString();
         String selMod = filterModality.getText().toString();
         String selVenue = filterVenue.getText().toString();
-        String selStatus = filterStatus.getText().toString(); // Nuevo filtro
+        String selStatus = filterStatus.getText().toString();
 
         List<EventModel> filteredList = new ArrayList<>();
 
         for (EventModel event : allEventsList) {
-            // Lógica de coincidencia (ignora mayúsculas/minúsculas para seguridad)
+            // FILTRO DE SEGURIDAD: Si no es admin y está oculto, saltar
+            if (!isAdmin && !event.isVisible()) {
+                continue;
+            }
+
             boolean matchDisc = selDisc.equals("Todas") || selDisc.equalsIgnoreCase(event.getDiscipline());
             boolean matchMod = selMod.equals("Todas") || selMod.equalsIgnoreCase(event.getModality());
             boolean matchVenue = selVenue.equals("Todas") || selVenue.equalsIgnoreCase(event.getPlaceName());
 
             // Lógica de Estatus (Calculamos el estatus dinámico o usamos el guardado)
             String currentStatus = event.getTimeStatus(); // Usamos el helper del modelo
-            if (event.getStatus() != null && event.getStatus().equals("CANCELADO")) {
-                currentStatus = "CANCELADO";
+
+            // Si en base de datos dice CANCELADO o CONFIRMADO, eso tiene prioridad sobre la fecha
+            if (event.getStatus() != null && (event.getStatus().equals("CANCELADO") || event.getStatus().equals("CONFIRMADO"))) {
+                currentStatus = event.getStatus();
             }
 
-            boolean matchStatus = selStatus.equals("Todos") || selStatus.equalsIgnoreCase(currentStatus) || selStatus.equalsIgnoreCase(event.getStatus());
+            boolean matchStatus = selStatus.equals("Todos") || selStatus.equalsIgnoreCase(currentStatus);
 
             if (matchDisc && matchMod && matchVenue && matchStatus) {
                 filteredList.add(event);
@@ -209,33 +216,11 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
         }
     }
 
-    /**
-     * Lógica de Negocio: Cancelación Automática
-     */
     private void checkAutoCancellations(List<EventModel> events) {
-        long now = System.currentTimeMillis();
-        boolean needsRefresh = false;
-
+        // Esta lógica ya la maneja en parte el repository.checkAndConfirmEvent,
+        // pero mantenemos esta iteración rápida para refrescar vista si es necesario.
         for (EventModel event : events) {
-            if (event.getEventDateTime() != null &&
-                    event.getEventDateTime().getTime() < now &&
-                    event.getCurrentParticipants() < event.getMinQuota() &&
-                    !"CANCELADO".equals(event.getStatus())) {
-
-                event.setStatus("CANCELADO");
-                needsRefresh = true; // Refrescar lista si algo cambió
-
-                repository.cancelEvent(event.getId(), event.getTitle(),
-                        "Cancelado automáticamente", "SYSTEM", "Sistema",
-                        new EventRepository.OnEventCancelledListener() {
-                            @Override public void onEventCancelled() { }
-                            @Override public void onError(String error) { }
-                        });
-            }
-        }
-
-        if (needsRefresh) {
-            adapter.notifyDataSetChanged();
+            repository.checkAndConfirmEvent(event);
         }
     }
 
@@ -251,17 +236,17 @@ public class EventsActivity extends AppCompatActivity implements EventsAdapter.O
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        loadAllEvents();
+    }
+
+    // --- ESTE ES EL MÉTODO QUE FALTABA Y CAUSABA EL ERROR ---
+    @Override
     public void onEventClick(EventModel event) {
         Intent intent = new Intent(this, ActivityEventDetail.class);
         intent.putExtra("eventModel", event);
         intent.putExtra("eventId", event.getId());
         startActivity(intent);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Recargar al volver por si se editó algo en el detalle
-        loadAllEvents();
     }
 }

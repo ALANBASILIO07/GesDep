@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_filter_status"
+        android:title="Filtrar por Estatus"
+        android:icon="@drawable/ic_filter"
+        app:showAsAction="ifRoom">
+        <menu>
+            <item android:id="@+id/filter_all" android:title="Todos (Excepto Cancelados/Finalizados)"/>
+            <item android:id="@+id/filter_live" android:title="EN VIVO"/>
+            <item android:id="@+id/filter_pending" android:title="PENDIENTE"/>
+            <item android:id="@+id/filter_canceled" android:title="CANCELADO"/>
+            <item android:id="@+id/filter_confirmed" android:title="CONFIRMADO"/>
+            <item android:id="@+id/filter_finalized" android:title="FINALIZADO"/>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_refresh"
+        android:title="Actualizar"
+        android:icon="@drawable/ic_refresh"
+        app:showAsAction="ifRoom" />
+
+</menu>

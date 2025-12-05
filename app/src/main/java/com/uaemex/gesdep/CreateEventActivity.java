@@ -295,6 +295,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
         if (!etDeadlineDate.getText().toString().isEmpty()) {
             // Si hay fecha límite, asignamos las 23:59 de ese día
+            copyDateToTime(calendarEventDate, calendarDeadline); // Usar la misma fecha del evento si no se seleccionó otra
             calendarDeadline.set(Calendar.HOUR_OF_DAY, 23);
             calendarDeadline.set(Calendar.MINUTE, 59);
         }
@@ -398,7 +399,16 @@ public class CreateEventActivity extends AppCompatActivity {
         String uid = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : "anon";
         event.setOrganizerId(uid);
         event.setOrganizerName("IMCUFIDE");
-        event.setStatus("ACTIVO");
+
+        // --- FIX DE INTEGRIDAD DE ESTADOS ---
+        event.setStatus("PENDIENTE"); // <-- CORRECCIÓN: Usar PENDIENTE como estado inicial base
+
+        // Lógica de confirmación inmediata (opcional): si el evento ya está en el pasado
+        Date now = new Date();
+        if (calendarStartTime.getTime().before(now)) {
+            event.setStatus("EN VIVO");
+        }
+
         event.setCreatedAt(new Date()); // Date actual
         event.setImageUrls(imageUrls);
 

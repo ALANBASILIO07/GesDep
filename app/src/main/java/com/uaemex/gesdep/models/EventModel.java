@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class EventModel implements Serializable {
 
@@ -42,6 +43,17 @@ public class EventModel implements Serializable {
     private String organizerId;
     private String organizerName;
 
+    private boolean visible = true; // Por defecto es visible al crear
+
+    // Getter y Setter
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
     @ServerTimestamp
     private Date createdAt;
 
@@ -49,7 +61,7 @@ public class EventModel implements Serializable {
 
     public EventModel() {
         this.imageUrls = new ArrayList<>();
-        this.status = "ACTIVO";
+        this.status = "PENDIENTE"; // <-- CORRECCIÓN: Estado inicial es PENDIENTE
         this.currentParticipants = 0;
         this.paid = false;
         this.cost = 0.0;
@@ -123,14 +135,21 @@ public class EventModel implements Serializable {
     public String getTimeStatus() {
         if ("CANCELADO".equals(status)) return "CANCELADO";
         if (startTime == null || endTime == null) return "PENDIENTE";
-        long now = new Date().getTime();
-        long startMillis = startTime.getTime();
-        long endMillis = endTime.getTime();
 
-        if (now < startMillis) return "PENDIENTE";
-        else if (now >= startMillis && now <= endMillis) return "EN VIVO";
+        // Obtenemos el offset actual de la zona horaria del dispositivo
+        TimeZone tz = TimeZone.getDefault();
+        long now = new Date().getTime();
+        long tzOffset = tz.getOffset(now);
+
+        // Ajustamos los timestamps del evento a la hora local para una comparación significativa
+        long startLocalAdjusted = startTime.getTime() + tzOffset;
+        long endLocalAdjusted = endTime.getTime() + tzOffset;
+
+        if (now < startLocalAdjusted) return "PENDIENTE";
+        else if (now >= startLocalAdjusted && now <= endLocalAdjusted) return "EN VIVO";
         else return "FINALIZADO";
     }
+
     @Exclude public int getAvailableSpots() { return maxQuota - currentParticipants; }
     @Exclude public boolean isFull() { return currentParticipants >= maxQuota; }
 }
