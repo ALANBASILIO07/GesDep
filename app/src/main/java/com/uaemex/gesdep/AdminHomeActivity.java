@@ -46,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 public class AdminHomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
+    private NavigationView navigationView; // Referencia global para actualizar header
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private final String TAG = "LiveEvents";
@@ -75,7 +76,7 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
 
         initViews();
         setupNavigation();
-        loadUserInfo();
+        // loadUserInfo se llama en onResume ahora para mantener actualizado
     }
 
     @Override
@@ -83,6 +84,8 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         super.onResume();
         loadDashboardData();
         loadLiveEvents();
+        loadUserInfo(); // Actualiza saludo "Hola, Juan!"
+        updateNavHeader(); // Actualiza foto y datos en menú lateral
     }
 
     private void initViews() {
@@ -127,7 +130,7 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view); // Guardamos la referencia
         navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -136,37 +139,70 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         toggle.getDrawerArrowDrawable().setColor(getResources().getColor(android.R.color.white));
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+    }
 
-        updateNavHeader(navigationView);
+    // Método optimizado para refrescar el menú lateral
+    private void updateNavHeader() {
+        if (navigationView == null) return;
+
+        View headerView = navigationView.getHeaderView(0);
+        TextView navName = headerView.findViewById(R.id.navHeaderName);
+        TextView navEmail = headerView.findViewById(R.id.navHeaderEmail);
+        ImageView navImage = headerView.findViewById(R.id.imgProfile);
+
+        FirebaseUser user = auth.getCurrentUser();
+        if (user != null) {
+            navEmail.setText(user.getEmail());
+            db.collection("users").document(user.getUid()).get()
+                    .addOnSuccessListener(doc -> {
+                        if (doc.exists()) {
+                            String name = doc.getString("name");
+                            // Intentamos obtener la URL de ambos campos posibles
+                            String photoUrl = doc.getString("photoUrl");
+                            if (photoUrl == null) photoUrl = doc.getString("profilePhotoUrl");
+
+                            if (name != null) navName.setText(name);
+
+                            if (photoUrl != null && !photoUrl.isEmpty()) {
+                                // LIMPIEZA DE TINTES PARA QUE SE VEA LA FOTO REAL
+                                navImage.setColorFilter(null);
+                                navImage.setPadding(0,0,0,0);
+
+                                Glide.with(this)
+                                        .load(photoUrl)
+                                        .apply(RequestOptions.circleCropTransform())
+                                        .into(navImage);
+                            } else {
+                                // Si no hay foto, mostramos icono blanco con padding
+                                navImage.setImageResource(R.drawable.ic_trophy);
+                                navImage.setPadding(30,30,30,30);
+                                navImage.setColorFilter(getResources().getColor(android.R.color.white));
+                            }
+                        }
+                    });
+        }
     }
 
     private void loadDashboardData() {
         NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("es", "MX"));
 
-        // 1. Eventos Activos
         db.collection("events")
-                .whereIn("status", Arrays.asList("ACTIVO", "PENDIENTE", "CONFIRMADO", "EN VIVO")) // <-- FIX STATUSES
-                .count()
-                .get(AggregateSource.SERVER)
+                .whereIn("status", Arrays.asList("ACTIVO", "PENDIENTE", "CONFIRMADO", "EN VIVO"))
+                .count().get(AggregateSource.SERVER)
                 .addOnSuccessListener(snapshot -> tvCountEvents.setText(String.valueOf(snapshot.getCount())));
 
-        // 2. Usuarios
         db.collection("users").whereEqualTo("role", "user").count().get(AggregateSource.SERVER)
                 .addOnSuccessListener(snapshot -> tvCountUsers.setText(String.valueOf(snapshot.getCount())));
 
-        // 3. Sedes
         db.collection("venues").count().get(AggregateSource.SERVER)
                 .addOnSuccessListener(snapshot -> tvCountVenues.setText(String.valueOf(snapshot.getCount())));
 
-        // 4. Reportes (Placeholder)
         tvCountReports.setText("0");
 
-        // 5. SALDO ACTUAL (Lectura segura para evitar el crash de deserialización)
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
             db.collection("users").document(user.getUid()).get()
                     .addOnSuccessListener(doc -> {
-                        // LECTURA SEGURA: Usamos getDouble() directo, no toObject
                         Double credit = doc.getDouble("appCredit");
                         if (credit == null) credit = 0.0;
                         tvCurrentCredit.setText(format.format(credit));
@@ -177,72 +213,32 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         }
     }
 
-    /**
-     * Consulta y filtra los eventos para mostrar solo aquellos que están 'En Vivo'.
-     * **FIX DE TZ FINAL:** Ajusta el Start/End Time leído de Firebase a la hora local (CST).
-     */
     private void loadLiveEvents() {
-        // Margen de gracia para eventos recién finalizados (10 minutos es un margen seguro)
         final long GRACE_PERIOD_MINUTES = 10;
         final long GRACE_PERIOD_MILLIS = TimeUnit.MINUTES.toMillis(GRACE_PERIOD_MINUTES);
-
-        // 1. Obtener la hora local actual.
         long nowLocal = System.currentTimeMillis();
-
-        // 2. Determinar el desplazamiento de la zona horaria local.
         TimeZone tz = TimeZone.getDefault();
         long tzOffset = tz.getOffset(nowLocal);
 
-        Log.d(TAG, "=========================================================");
-        Log.d(TAG, "Hora Local del Dispositivo: " + new Date(nowLocal).toString());
-        Log.d(TAG, "Offset de Zona Horaria (ms): " + tzOffset);
-        Log.d(TAG, "=========================================================");
-
         db.collection("events")
-                // FIX CLAVE: Incluir el estado "EN VIVO"
                 .whereIn("status", Arrays.asList("ACTIVO", "PENDIENTE", "CONFIRMADO", "EN VIVO"))
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     liveEventsList.clear();
-
                     for (DocumentSnapshot doc : querySnapshot) {
                         EventModel event = doc.toObject(EventModel.class);
-
                         if (event != null && event.getStartTime() != null && event.getEndTime() != null) {
-
-                            // Timestamps de la DB (Asumidos UTC)
                             long startUtc = event.getStartTime().getTime();
                             long endUtc = event.getEndTime().getTime();
-
-                            // **FIX CLAVE: AJUSTAR EL EVENTO A LA HORA LOCAL DE MÉXICO**
-                            // Sumar el offset local al timestamp UTC. Esto lo convierte a la hora local esperada.
                             long startLocalAdjusted = startUtc + tzOffset;
                             long endLocalAdjusted = endUtc + tzOffset;
 
-                            // Diagnóstico: Registrar la hora de inicio del evento en formato legible
-                            Log.d(TAG, "--- Evento: " + event.getTitle() + " ---");
-                            Log.d(TAG, "Start Time (DB/UTC): " + new Date(startUtc).toString());
-                            Log.d(TAG, "End Time (DB/UTC): " + new Date(endUtc).toString());
-                            Log.d(TAG, "Start Time (Local Adjusted): " + new Date(startLocalAdjusted).toString());
-
-
-                            // FILTRO APLICADO: HORA_ACTUAL_LOCAL vs. HORARIO_AJUSTADO
-                            // Debe estar dentro del rango [startLocalAdjusted, endLocalAdjusted + GRACE_PERIOD_MILLIS]
                             if (nowLocal >= startLocalAdjusted && nowLocal <= (endLocalAdjusted + GRACE_PERIOD_MILLIS)) {
-                                Log.d(TAG, ">>> INCLUIDO: Cumple condición de tiempo.");
                                 event.setId(doc.getId());
-
-                                // Si está incluido y su estado *actual* en la DB NO es EN VIVO,
-                                // esto es una oportunidad perdida (pero el problema de DB lo corrige ActivityEventDetail)
-
                                 liveEventsList.add(event);
-                            } else {
-                                Log.d(TAG, ">>> EXCLUIDO: No cumple condición de tiempo.");
                             }
                         }
                     }
-
-                    // Actualizar UI
                     if (liveEventsList.isEmpty()) {
                         tvNoLiveEvents.setVisibility(View.VISIBLE);
                         rvLiveEvents.setVisibility(View.GONE);
@@ -260,7 +256,6 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
             db.collection("users").document(user.getUid()).get()
                     .addOnSuccessListener(doc -> {
                         if (doc.exists()) {
-                            // LECTURA SEGURA: Aquí usamos getString() para el nombre
                             String name = doc.getString("name");
                             if (name != null) tvWelcome.setText("Hola, " + name + "!");
                         }
@@ -268,39 +263,6 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         }
     }
 
-    private void updateNavHeader(NavigationView navigationView) {
-        View headerView = navigationView.getHeaderView(0);
-        TextView navName = headerView.findViewById(R.id.navHeaderName);
-        TextView navEmail = headerView.findViewById(R.id.navHeaderEmail);
-        ImageView navImage = headerView.findViewById(R.id.imgProfile);
-
-        FirebaseUser user = auth.getCurrentUser();
-        if (user != null) {
-            navEmail.setText(user.getEmail());
-            db.collection("users").document(user.getUid()).get()
-                    .addOnSuccessListener(doc -> {
-                        if (doc.exists()) {
-                            // LECTURA SEGURA: Evitamos toObject para los campos que causan el crash
-                            String name = doc.getString("name");
-                            String photoUrl = doc.getString("profilePhotoUrl"); // Asumiendo este campo
-
-                            if (name != null) navName.setText(name);
-
-                            if (photoUrl != null && !photoUrl.isEmpty()) {
-                                Glide.with(this).load(photoUrl).apply(RequestOptions.circleCropTransform()).into(navImage);
-                                navImage.setPadding(0,0,0,0);
-                                navImage.setColorFilter(null);
-                            } else {
-                                navImage.setImageResource(R.drawable.ic_trophy);
-                                navImage.setPadding(30,30,30,30);
-                                navImage.setColorFilter(getResources().getColor(android.R.color.white));
-                            }
-                        }
-                    });
-        }
-    }
-
-    // EN AdminHomeActivity.java
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -309,7 +271,7 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         else if (id == R.id.nav_admin_users) startActivity(new Intent(this, ParticipantsActivity.class));
         else if (id == R.id.nav_admin_venues) startActivity(new Intent(this, ManageVenuesActivity.class));
         else if (id == R.id.nav_admin_inbox) startActivity(new Intent(this, NotificationsActivity.class));
-        else if (id == R.id.nav_admin_map) startActivity(new Intent(this, MapEventsActivity.class)); // <-- CAMBIO APLICADO
+        else if (id == R.id.nav_admin_map) startActivity(new Intent(this, MapEventsActivity.class));
         else if (id == R.id.nav_admin_reports) startActivity(new Intent(this, MaintenanceActivity.class));
         else if (id == R.id.nav_admin_settings) Toast.makeText(this, "Ajustes próximamente", Toast.LENGTH_SHORT).show();
         else if (id == R.id.nav_admin_logout) logout();
@@ -335,15 +297,12 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         }
     }
 
-    // --- ADAPTADOR INTERNO EVENTOS EN VIVO ---
     class LiveEventAdapter extends RecyclerView.Adapter<LiveEventAdapter.ViewHolder> {
         private List<EventModel> list;
         public LiveEventAdapter(List<EventModel> list) { this.list = list; }
 
         @NonNull @Override public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            // Reutilizamos item_event.xml
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_event, parent, false);
-            // Establecer un ancho fijo para el scroll horizontal
             int width = (int) (300 * parent.getContext().getResources().getDisplayMetrics().density);
             v.setLayoutParams(new ViewGroup.LayoutParams(width, ViewGroup.LayoutParams.WRAP_CONTENT));
             return new ViewHolder(v);
@@ -351,67 +310,39 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
 
         @Override public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             EventModel event = list.get(position);
-
-            // 1. Título y Categoría
             holder.tvTitle.setText(event.getTitle());
             holder.tvCategory.setText("🔴 EN VIVO • " + event.getDiscipline());
             holder.tvCategory.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.holo_red_dark));
 
-            // 2. Tiempo de inicio (Lógica refinada para mostrar tiempo transcurrido o restante)
-            long now = new Date().getTime(); // Hora local
-            long start = event.getStartTime().getTime(); // Timestamp UTC
-
-            // Usamos el Start Time ajustado a la hora local para calcular la diferencia con precisión
+            long now = new Date().getTime();
+            long start = event.getStartTime().getTime();
             TimeZone tz = TimeZone.getDefault();
             long tzOffset = tz.getOffset(now);
             long startLocalAdjusted = start + tzOffset;
-
-            long diff = now - startLocalAdjusted; // Cálculo de diferencia basado en la hora local
+            long diff = now - startLocalAdjusted;
 
             String timeText;
             if (diff < 0) {
-                // Evento aún no inicia
                 long remaining = Math.abs(diff);
                 long hours = TimeUnit.MILLISECONDS.toHours(remaining);
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(remaining) % 60;
-
-                if (hours > 0) {
-                    timeText = "Inicia en " + hours + " hr y " + minutes + " min";
-                } else {
-                    timeText = "Inicia en " + minutes + " min";
-                }
-
+                timeText = "Inicia en " + (hours > 0 ? hours + " hr " : "") + minutes + " min";
             } else {
-                // Evento ya inició
                 long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
-                if (minutes < 1) {
-                    timeText = "Iniciado hace menos de 1 min";
-                } else if (minutes < 60) {
-                    timeText = "Iniciado hace " + minutes + " min";
-                } else {
-                    long hours = TimeUnit.MILLISECONDS.toHours(diff);
-                    timeText = "Iniciado hace " + hours + " hr(s)";
-                }
+                timeText = "Iniciado hace " + (minutes < 60 ? minutes + " min" : TimeUnit.MILLISECONDS.toHours(diff) + " hr(s)");
             }
             holder.tvDate.setText(timeText);
-
-            // 3. Ubicación y Participantes
             holder.tvLocation.setText(event.getPlaceName());
             holder.tvParticipants.setText(event.getCurrentParticipants() + "/" + event.getMaxQuota());
 
-            // 4. Estatus (Fijo para EN VIVO)
             try {
-                // Usamos R.color.red_error si existe
                 holder.cardStatus.setCardBackgroundColor(ContextCompat.getColorStateList(holder.itemView.getContext(), R.color.red_error));
             } catch (Exception e) {
-                // Fallback si R.color.red_error no existe
                 holder.cardStatus.setCardBackgroundColor(ContextCompat.getColorStateList(holder.itemView.getContext(), android.R.color.holo_red_light));
             }
-
             holder.tvStatus.setText("LIVE");
             holder.tvStatus.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.white));
 
-            // 5. Imagen
             if (event.getImageUrls() != null && !event.getImageUrls().isEmpty()) {
                 Glide.with(holder.itemView.getContext())
                         .load(event.getImageUrls().get(0))
@@ -424,14 +355,12 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         @Override public int getItemCount() { return list.size(); }
 
         class ViewHolder extends RecyclerView.ViewHolder {
-            // Vistas declaradas para item_event.xml
             TextView tvTitle, tvCategory, tvDate, tvLocation, tvStatus, tvParticipants;
             MaterialCardView cardStatus;
             ImageView ivThumbnail;
 
             public ViewHolder(View v) {
                 super(v);
-                // Vinculación de Vistas (IDs asumidos de item_event.xml)
                 tvTitle = v.findViewById(R.id.tvEventName);
                 tvCategory = v.findViewById(R.id.tvCategory);
                 tvDate = v.findViewById(R.id.tvDate);
@@ -441,7 +370,6 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
                 cardStatus = v.findViewById(R.id.cardStatus);
                 ivThumbnail = v.findViewById(R.id.ivEventThumbnail);
 
-                // Listener para navegar al detalle
                 v.setOnClickListener(view -> {
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {

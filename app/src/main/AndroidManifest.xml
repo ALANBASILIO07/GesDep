@@ -53,7 +53,14 @@
         <activity android:name=".MapPickerActivity" android:exported="false" android:screenOrientation="portrait"/>
         <activity android:name=".NotificationsActivity" android:exported="false" />
         <activity android:name=".MaintenanceActivity" android:exported="false" />
+
         <activity android:name=".ParticipantsActivity" android:exported="false" />
+
+        <activity android:name=".UserDetailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"/>
+
         <activity android:name=".CoachesActivity" android:exported="false" />
         <activity android:name=".AttendanceActivity" android:exported="false" />
 

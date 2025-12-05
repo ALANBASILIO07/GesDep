@@ -12,7 +12,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
-import android.widget.ScrollView; // IMPORTANTE
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,7 +44,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private ImageView ivRegisterProfile;
     private CardView btnPickPhoto;
-    private ScrollView registerScrollView; // ScrollView para UX
+    private ScrollView registerScrollView;
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
@@ -60,15 +60,23 @@ public class RegisterActivity extends AppCompatActivity {
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     selectedImageUri = result.getData().getData();
+
+                    // --- LIMPIEZA DE TINTES AQUÍ ---
+                    ivRegisterProfile.setColorFilter(null);
+                    ivRegisterProfile.setImageTintList(null);
+                    ivRegisterProfile.setPadding(0, 0, 0, 0);
+
                     Glide.with(this)
                             .load(selectedImageUri)
                             .apply(RequestOptions.circleCropTransform())
                             .into(ivRegisterProfile);
-                    ivRegisterProfile.setColorFilter(null);
-                    ivRegisterProfile.setPadding(0, 0, 0, 0);
                 }
             }
     );
+
+    // ... (El resto de tu código onCreate, initViews, listeners, validaciones,
+    // firebase auth, etc. SE MANTIENE EXACTAMENTE IGUAL) ...
+    // Solo asegurate de usar la versión completa que tenías antes, con el cambio en galleryLauncher.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,8 +105,6 @@ public class RegisterActivity extends AppCompatActivity {
         tvGoToLogin = findViewById(R.id.tvGoToLogin);
         ivRegisterProfile = findViewById(R.id.ivRegisterProfile);
         btnPickPhoto = findViewById(R.id.btnPickPhoto);
-
-        // Nuevo: Vincular el ScrollView
         registerScrollView = findViewById(R.id.registerScrollView);
 
         tilOrgCode.setVisibility(View.GONE);
@@ -129,8 +135,6 @@ public class RegisterActivity extends AppCompatActivity {
             if (checkedId == R.id.rbOrganizer || checkedId == R.id.rbCoach) {
                 tilOrgCode.setVisibility(View.VISIBLE);
                 etOrgCode.setHint(checkedId == R.id.rbOrganizer ? "Código de Organizador" : "Código de Entrenador");
-
-                // UX: Si aparece el campo, intentar hacer scroll hacia él
                 registerScrollView.post(() -> registerScrollView.smoothScrollTo(0, tilOrgCode.getBottom()));
             } else {
                 tilOrgCode.setVisibility(View.GONE);
@@ -138,7 +142,6 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
-        // --- UX: SCROLL AUTOMÁTICO AL ENFOCAR CAMPO ---
         View.OnFocusChangeListener focusListener = (view, hasFocus) -> {
             if (hasFocus) {
                 View parent = (View) view.getParent().getParent();
@@ -151,17 +154,15 @@ public class RegisterActivity extends AppCompatActivity {
         etPassword.setOnFocusChangeListener(focusListener);
         etConfirmPassword.setOnFocusChangeListener(focusListener);
         etOrgCode.setOnFocusChangeListener(focusListener);
-        // ------------------------------------------------
 
         btnRegister.setOnClickListener(v -> validateAndRegister());
     }
 
-    // UX: Método para desplazar la pantalla
     private void scrollToView(final View view) {
         registerScrollView.postDelayed(() -> {
             int y = view.getTop();
             registerScrollView.smoothScrollTo(0, y);
-        }, 200); // Pequeño delay para dar tiempo al teclado de abrir
+        }, 200);
     }
 
     private void validateAndRegister() {

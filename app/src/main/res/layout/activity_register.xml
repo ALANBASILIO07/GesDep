@@ -13,16 +13,18 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp"
-        android:paddingBottom="120dp"> <ImageButton
-        android:id="@+id/btnBack"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="8dp"
-        android:src="@drawable/ic_arrow_black"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        app:tint="@color/icon_tint_color"
-        android:contentDescription="Regresar"
-        android:layout_marginBottom="8dp"/>
+        android:paddingBottom="120dp">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_arrow_black"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/icon_tint_color"
+            android:contentDescription="Regresar"
+            android:layout_marginBottom="8dp"/>
 
         <FrameLayout
             android:layout_width="wrap_content"
@@ -43,8 +45,7 @@
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_trophy"
                     android:scaleType="centerCrop"
-                    android:padding="20dp"
-                    app:tint="@color/icon_tint_color"/>
+                    android:padding="20dp"/>
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
@@ -91,7 +92,6 @@
             app:boxBackgroundColor="@color/card_surface_color"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="16dp">
-
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etName"
                 android:layout_width="match_parent"
@@ -111,7 +111,6 @@
             app:boxBackgroundColor="@color/card_surface_color"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="16dp">
-
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
@@ -133,7 +132,6 @@
             app:endIconMode="password_toggle"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="16dp">
-
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
@@ -155,7 +153,6 @@
             app:endIconMode="password_toggle"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="24dp">
-
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etConfirmPassword"
                 android:layout_width="match_parent"
@@ -179,7 +176,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp">
-
             <RadioButton
                 android:id="@+id/rbParticipant"
                 android:layout_width="match_parent"
@@ -189,7 +185,6 @@
                 android:textColor="@color/text_primary_color"
                 android:buttonTint="@color/green_primary"
                 android:padding="12dp"/>
-
             <RadioButton
                 android:id="@+id/rbCoach"
                 android:layout_width="match_parent"
@@ -198,7 +193,6 @@
                 android:textColor="@color/text_primary_color"
                 android:buttonTint="@color/green_primary"
                 android:padding="12dp"/>
-
             <RadioButton
                 android:id="@+id/rbOrganizer"
                 android:layout_width="match_parent"
@@ -219,7 +213,6 @@
             app:boxBackgroundColor="@color/card_surface_color"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_marginBottom="24dp">
-
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etOrgCode"
                 android:layout_width="match_parent"
@@ -254,14 +247,12 @@
             android:orientation="horizontal"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp">
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="¿Ya tienes cuenta? "
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary_color" />
-
             <TextView
                 android:id="@+id/tvGoToLogin"
                 android:layout_width="wrap_content"

@@ -3,20 +3,20 @@ package com.uaemex.gesdep.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ImageButton; // Importación necesaria
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.uaemex.gesdep.R;
-import com.uaemex.gesdep.models.UserModel; // Usamos UserModel
+import com.uaemex.gesdep.models.UserModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-// El nombre de la clase es ParticipantsAdapter (Plural)
 public class ParticipantAdapter extends RecyclerView.Adapter<ParticipantAdapter.UserViewHolder> {
 
     private List<UserModel> userList;
@@ -26,7 +26,6 @@ public class ParticipantAdapter extends RecyclerView.Adapter<ParticipantAdapter.
         void onUserClick(UserModel user);
     }
 
-    // CORRECCIÓN CLAVE: El constructor debe llamarse igual que la clase (ParticipantsAdapter)
     public ParticipantAdapter(OnUserClickListener listener) {
         this.userList = new ArrayList<>();
         this.listener = listener;
@@ -35,21 +34,17 @@ public class ParticipantAdapter extends RecyclerView.Adapter<ParticipantAdapter.
     @NonNull
     @Override
     public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_participant, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_participant, parent, false);
         return new UserViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
-        UserModel user = userList.get(position);
-        holder.bind(user);
+        holder.bind(userList.get(position));
     }
 
     @Override
-    public int getItemCount() {
-        return userList.size();
-    }
+    public int getItemCount() { return userList.size(); }
 
     public void updateUsers(List<UserModel> newUserList) {
         this.userList = newUserList;
@@ -57,46 +52,66 @@ public class ParticipantAdapter extends RecyclerView.Adapter<ParticipantAdapter.
     }
 
     class UserViewHolder extends RecyclerView.ViewHolder {
-        private TextView tvParticipantName, tvParticipantActivity, tvParticipantAge, tvParticipantPhone;
-        private ImageButton btnRemove;
+        private TextView tvName, tvEmail, tvRole;
+        private ImageView ivProfile;
 
         UserViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvParticipantName = itemView.findViewById(R.id.tvParticipantName);
-            tvParticipantActivity = itemView.findViewById(R.id.tvParticipantActivity);
-            tvParticipantAge = itemView.findViewById(R.id.tvParticipantAge);
-            tvParticipantPhone = itemView.findViewById(R.id.tvParticipantPhone);
-            btnRemove = itemView.findViewById(R.id.btnRemove);
+            tvName = itemView.findViewById(R.id.tvParticipantName);
+            tvEmail = itemView.findViewById(R.id.tvParticipantEmail);
+            tvRole = itemView.findViewById(R.id.tvParticipantRole);
+            ivProfile = itemView.findViewById(R.id.ivProfile);
 
             itemView.setOnClickListener(v -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION && listener != null) {
-                    listener.onUserClick(userList.get(position));
+                int pos = getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION && listener != null) {
+                    listener.onUserClick(userList.get(pos));
                 }
-            });
-
-            btnRemove.setOnClickListener(v -> {
-                Toast.makeText(itemView.getContext(), "Remover: " + userList.get(getAdapterPosition()).getName(), Toast.LENGTH_SHORT).show();
             });
         }
 
         public void bind(UserModel user) {
-            tvParticipantName.setText(user.getName() != null ? user.getName() : "Usuario Desconocido");
+            tvName.setText(user.getName() != null ? user.getName() : "Sin Nombre");
+            tvEmail.setText(user.getEmail() != null ? user.getEmail() : "Sin Email");
 
-            // Mapeo: Rol/Tipo de usuario e Institución
-            String userRole = user.getRole() != null ? user.getRole().toUpperCase() : "N/A";
-            String userInstitution = user.getInstitution() != null && !user.getInstitution().isEmpty() ? user.getInstitution() : "N/A";
+            String rawRole = user.getRole() != null ? user.getRole() : "user";
+            String displayRole;
+            switch (rawRole.toLowerCase()) {
+                case "admin": displayRole = "ADMINISTRADOR"; break;
+                case "coach": displayRole = "ENTRENADOR"; break;
+                case "user":
+                default: displayRole = "PARTICIPANTE"; break;
+            }
+            tvRole.setText(displayRole);
 
-            tvParticipantActivity.setText("Tipo: " + userRole + " | Inst.: " + userInstitution);
+            // --- LÓGICA DE FOTO CORREGIDA ---
+            if (user.getProfilePhotoUrl() != null && !user.getProfilePhotoUrl().isEmpty()) {
+                // SI HAY FOTO:
+                // 1. Quitar padding
+                ivProfile.setPadding(0, 0, 0, 0);
+                // 2. Quitar filtro de color (Tinte)
+                ivProfile.setColorFilter(null);
+                ivProfile.setImageTintList(null);
+                // 3. Quitar fondo verde (para que se vea solo la foto redonda)
+                ivProfile.setBackground(null);
 
-            // Mapeo: Edad (Usamos Rol/Tipo ya que 'age' no existe en UserModel)
-            tvParticipantAge.setText("Rol: " + userRole);
-
-            // Mapeo: Teléfono
-            tvParticipantPhone.setText("Tel: " + (user.getPhone() != null && !user.getPhone().isEmpty() ? user.getPhone() : "N/A"));
-
-            // Lógica simple de visibilidad del botón
-            btnRemove.setVisibility("admin".equalsIgnoreCase(userRole) ? View.GONE : View.VISIBLE);
+                Glide.with(itemView.getContext())
+                        .load(user.getProfilePhotoUrl())
+                        .circleCrop()
+                        .placeholder(R.drawable.bg_circle_green)
+                        .into(ivProfile);
+            } else {
+                // NO HAY FOTO (Trofeo):
+                // 1. Poner padding
+                int padding = (int) (10 * itemView.getContext().getResources().getDisplayMetrics().density);
+                ivProfile.setPadding(padding, padding, padding, padding);
+                // 2. Poner filtro BLANCO al trofeo
+                ivProfile.setColorFilter(ContextCompat.getColor(itemView.getContext(), android.R.color.white));
+                // 3. Poner fondo verde circular
+                ivProfile.setBackgroundResource(R.drawable.bg_circle_green);
+                // 4. Poner icono de trofeo
+                ivProfile.setImageResource(R.drawable.ic_trophy);
+            }
         }
     }
 }

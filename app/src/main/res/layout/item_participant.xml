@@ -13,75 +13,53 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="12dp">
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/ivProfile"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_trophy"
+            android:background="@drawable/bg_circle_green"
+            android:padding="10dp"
+            android:scaleType="centerCrop"
+            android:layout_marginEnd="12dp"/>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="6dp"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_person"
-                android:layout_marginEnd="8dp"
-                app:tint="@color/green_primary"/>
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tvParticipantName"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:textStyle="bold"
                 android:textSize="16sp"
                 android:textColor="?android:attr/textColorPrimary"
-                tools:text="Juan Pérez López"/>
+                tools:text="Nombre Usuario"/>
 
-            <ImageButton
-                android:id="@+id/btnRemove"
+            <TextView
+                android:id="@+id/tvParticipantEmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_close"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/design_default_color_error"
-                android:padding="4dp"
-                android:visibility="gone"/>
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvParticipantActivity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="?android:attr/textColorSecondary"
-            tools:text="Actividad: Fútbol • Torneo"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="4dp">
-
-            <TextView
-                android:id="@+id/tvParticipantAge"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:textSize="14sp"
                 android:textColor="?android:attr/textColorSecondary"
-                tools:text="Edad: 25"/>
+                tools:text="correo@ejemplo.com"/>
 
             <TextView
-                android:id="@+id/tvParticipantPhone"
-                android:layout_width="0dp"
+                android:id="@+id/tvParticipantRole"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="14sp"
-                android:textColor="?android:attr/textColorSecondary"
-                tools:text="Tel: 55-5555-5555"/>
+                android:textSize="12sp"
+                android:textColor="@color/green_primary"
+                android:textStyle="bold"
+                android:layout_marginTop="2dp"
+                tools:text="ROL: USER"/>
         </LinearLayout>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>
