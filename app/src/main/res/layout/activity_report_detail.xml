@@ -1,45 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
-    android:fillViewport="true">
+    android:background="@color/screen_background_color">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:fitsSystemWindows="true"
+        android:background="@color/green_primary"
+        app:elevation="0dp"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
 
-        <!-- Header -->
-        <LinearLayout
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:padding="16dp"
-            android:background="@color/primary"
-            android:elevation="4dp">
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="@color/white"
+            app:title="Detalle del Reporte"
+            app:titleTextColor="@color/white"/>
 
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_arrow_back"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:tint="@android:color/white"
-                android:contentDescription="Volver" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Detalle del Reporte"
-                android:textSize="20sp"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp" />
-        </LinearLayout>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -47,8 +36,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Event Info Card -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -66,7 +54,7 @@
                         android:layout_height="wrap_content"
                         android:text="Evento"
                         android:textSize="12sp"
-                        android:textColor="@color/text_secondary" />
+                        android:textColor="@color/text_secondary_color" />
 
                     <TextView
                         android:id="@+id/tvEventName"
@@ -74,14 +62,13 @@
                         android:layout_height="wrap_content"
                         android:text="Nombre del Evento"
                         android:textSize="18sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_primary_color"
                         android:textStyle="bold"
                         android:layout_marginTop="4dp" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Report Details Card -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -94,7 +81,6 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Priority and Status -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -112,7 +98,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Prioridad"
                                 android:textSize="12sp"
-                                android:textColor="@color/text_secondary" />
+                                android:textColor="@color/text_secondary_color" />
 
                             <TextView
                                 android:id="@+id/tvPriority"
@@ -136,7 +122,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Estado"
                                 android:textSize="12sp"
-                                android:textColor="@color/text_secondary" />
+                                android:textColor="@color/text_secondary_color" />
 
                             <TextView
                                 android:id="@+id/tvStatus"
@@ -145,18 +131,17 @@
                                 android:text="Pendiente"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/text_primary"
+                                android:textColor="@color/text_primary_color"
                                 android:layout_marginTop="4dp" />
                         </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Subject -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Asunto"
                         android:textSize="12sp"
-                        android:textColor="@color/text_secondary" />
+                        android:textColor="@color/text_secondary_color" />
 
                     <TextView
                         android:id="@+id/tvSubject"
@@ -164,18 +149,17 @@
                         android:layout_height="wrap_content"
                         android:text="Asunto del reporte"
                         android:textSize="18sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_primary_color"
                         android:textStyle="bold"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Category -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Categoría"
                         android:textSize="12sp"
-                        android:textColor="@color/text_secondary" />
+                        android:textColor="@color/text_secondary_color" />
 
                     <TextView
                         android:id="@+id/tvCategory"
@@ -183,17 +167,16 @@
                         android:layout_height="wrap_content"
                         android:text="Categoría"
                         android:textSize="14sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_primary_color"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Description -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Descripción"
                         android:textSize="12sp"
-                        android:textColor="@color/text_secondary" />
+                        android:textColor="@color/text_secondary_color" />
 
                     <TextView
                         android:id="@+id/tvDescription"
@@ -201,23 +184,21 @@
                         android:layout_height="wrap_content"
                         android:text="Descripción del reporte"
                         android:textSize="14sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_primary_color"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Created By -->
                     <TextView
                         android:id="@+id/tvCreatedBy"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Creado por: Usuario - Hace 2 días"
                         android:textSize="12sp"
-                        android:textColor="@color/text_secondary" />
+                        android:textColor="@color/text_secondary_color" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Photos Card -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cvPhotos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -238,7 +219,7 @@
                         android:text="Fotografías"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_primary_color"
                         android:layout_marginBottom="12dp" />
 
                     <androidx.recyclerview.widget.RecyclerView
@@ -246,10 +227,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Admin Response Card (only for admins or when response exists) -->
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cvAdminResponse"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -270,7 +250,7 @@
                         android:text="Respuesta del Administrador"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_primary_color"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
@@ -279,7 +259,7 @@
                         android:layout_height="wrap_content"
                         android:text="Respuesta del administrador"
                         android:textSize="14sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="@color/text_primary_color"
                         android:layout_marginBottom="8dp" />
 
                     <TextView
@@ -288,11 +268,10 @@
                         android:layout_height="wrap_content"
                         android:text="Por: Admin"
                         android:textSize="12sp"
-                        android:textColor="@color/text_secondary" />
+                        android:textColor="@color/text_secondary_color" />
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Admin Actions (only for admins) -->
             <LinearLayout
                 android:id="@+id/layoutAdminActions"
                 android:layout_width="match_parent"
@@ -300,8 +279,7 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <!-- Change Status -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
@@ -320,7 +298,7 @@
                             android:text="Cambiar Estado"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/text_primary"
+                            android:textColor="@color/text_primary_color"
                             android:layout_marginBottom="12dp" />
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -341,10 +319,9 @@
                                 android:inputType="none" />
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
-                <!-- Add Response -->
-                <androidx.cardview.widget.CardView
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
@@ -363,7 +340,7 @@
                             android:text="Agregar/Actualizar Respuesta"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/text_primary"
+                            android:textColor="@color/text_primary_color"
                             android:layout_marginBottom="12dp" />
 
                         <com.google.android.material.textfield.TextInputLayout
@@ -386,9 +363,8 @@
                                 android:gravity="top" />
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                </com.google.android.material.card.MaterialCardView>
 
-                <!-- Save Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSaveChanges"
                     android:layout_width="match_parent"
@@ -397,9 +373,9 @@
                     android:textSize="16sp"
                     android:textAllCaps="false"
                     app:cornerRadius="12dp"
+                    android:backgroundTint="@color/green_primary"
                     android:layout_marginBottom="16dp" />
 
-                <!-- Progress Bar -->
                 <ProgressBar
                     android:id="@+id/progressBar"
                     android:layout_width="wrap_content"
@@ -408,5 +384,6 @@
                     android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
