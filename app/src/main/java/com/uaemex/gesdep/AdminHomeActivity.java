@@ -46,19 +46,17 @@ import java.util.concurrent.TimeUnit;
 public class AdminHomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
-    private NavigationView navigationView; // Referencia global para actualizar header
+    private NavigationView navigationView;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private final String TAG = "LiveEvents";
 
-    // UI Dashboard
     private TextView tvWelcome;
     private TextView tvCountEvents, tvCountUsers, tvCountVenues, tvCountReports;
     private TextView tvCurrentCredit;
     private MaterialButton btnQuickCreate, btnQuickMessage, btnQuickRecharge;
     private View btnNotification, badgeNotification;
 
-    // Eventos en Vivo
     private RecyclerView rvLiveEvents;
     private TextView tvNoLiveEvents;
     private LiveEventAdapter liveAdapter;
@@ -76,7 +74,6 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
 
         initViews();
         setupNavigation();
-        // loadUserInfo se llama en onResume ahora para mantener actualizado
     }
 
     @Override
@@ -84,14 +81,12 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         super.onResume();
         loadDashboardData();
         loadLiveEvents();
-        loadUserInfo(); // Actualiza saludo "Hola, Juan!"
-        updateNavHeader(); // Actualiza foto y datos en menú lateral
+        loadUserInfo();
+        updateNavHeader();
     }
 
     private void initViews() {
         tvWelcome = findViewById(R.id.tvWelcome);
-
-        // KPIs
         tvCountEvents = findViewById(R.id.tvCountEvents);
         tvCountUsers = findViewById(R.id.tvCountUsers);
         tvCountVenues = findViewById(R.id.tvCountVenues);
@@ -104,18 +99,20 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         btnNotification = findViewById(R.id.btnNotification);
         badgeNotification = findViewById(R.id.badgeNotification);
 
-        // Live Events
         rvLiveEvents = findViewById(R.id.rvLiveEvents);
         tvNoLiveEvents = findViewById(R.id.tvNoLiveEvents);
 
-        // Configurar Recycler Horizontal
         liveAdapter = new LiveEventAdapter(liveEventsList);
         rvLiveEvents.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvLiveEvents.setAdapter(liveAdapter);
 
-        // Listeners
         btnQuickCreate.setOnClickListener(v -> startActivity(new Intent(this, CreateEventActivity.class)));
-        btnQuickMessage.setOnClickListener(v -> Toast.makeText(this, "Función de Avisos próximamente", Toast.LENGTH_SHORT).show());
+        btnQuickMessage.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CreateReportActivity.class);
+            intent.putExtra("eventId", "GENERAL");
+            intent.putExtra("eventName", "Aviso General");
+            startActivity(intent);
+        });
 
         btnQuickRecharge.setOnClickListener(v -> startActivity(new Intent(this, CreditActivity.class)));
 
@@ -130,7 +127,7 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view); // Guardamos la referencia
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -141,7 +138,6 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         toggle.syncState();
     }
 
-    // Método optimizado para refrescar el menú lateral
     private void updateNavHeader() {
         if (navigationView == null) return;
 
@@ -157,23 +153,16 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
                     .addOnSuccessListener(doc -> {
                         if (doc.exists()) {
                             String name = doc.getString("name");
-                            // Intentamos obtener la URL de ambos campos posibles
                             String photoUrl = doc.getString("photoUrl");
                             if (photoUrl == null) photoUrl = doc.getString("profilePhotoUrl");
 
                             if (name != null) navName.setText(name);
 
                             if (photoUrl != null && !photoUrl.isEmpty()) {
-                                // LIMPIEZA DE TINTES PARA QUE SE VEA LA FOTO REAL
                                 navImage.setColorFilter(null);
                                 navImage.setPadding(0,0,0,0);
-
-                                Glide.with(this)
-                                        .load(photoUrl)
-                                        .apply(RequestOptions.circleCropTransform())
-                                        .into(navImage);
+                                Glide.with(this).load(photoUrl).apply(RequestOptions.circleCropTransform()).into(navImage);
                             } else {
-                                // Si no hay foto, mostramos icono blanco con padding
                                 navImage.setImageResource(R.drawable.ic_trophy);
                                 navImage.setPadding(30,30,30,30);
                                 navImage.setColorFilter(getResources().getColor(android.R.color.white));
@@ -272,8 +261,9 @@ public class AdminHomeActivity extends AppCompatActivity implements NavigationVi
         else if (id == R.id.nav_admin_venues) startActivity(new Intent(this, ManageVenuesActivity.class));
         else if (id == R.id.nav_admin_inbox) startActivity(new Intent(this, NotificationsActivity.class));
         else if (id == R.id.nav_admin_map) startActivity(new Intent(this, MapEventsActivity.class));
-        else if (id == R.id.nav_admin_reports) startActivity(new Intent(this, MaintenanceActivity.class));
-        else if (id == R.id.nav_admin_settings) Toast.makeText(this, "Ajustes próximamente", Toast.LENGTH_SHORT).show();
+        else if (id == R.id.nav_admin_reports) startActivity(new Intent(this, ReportsListActivity.class));
+            // ✅ CONECTADO: Ahora abre SettingsActivity
+        else if (id == R.id.nav_admin_settings) startActivity(new Intent(this, SettingsActivity.class));
         else if (id == R.id.nav_admin_logout) logout();
 
         drawerLayout.closeDrawer(GravityCompat.START);

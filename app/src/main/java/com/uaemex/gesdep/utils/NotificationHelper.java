@@ -1,85 +1,106 @@
 package com.uaemex.gesdep.utils;
 
-import android.util.Log;
-
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.uaemex.gesdep.models.NotificationModel;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class NotificationHelper {
 
-    private static final String TAG = "NotificationHelper";
-    private final FirebaseFirestore db;
+    /**
+     * Save notification to Firestore
+     */
+    public static void saveNotification(FirebaseFirestore db, NotificationModel notification) {
+        Map<String, Object> notificationData = new HashMap<>();
+        notificationData.put("title", notification.getTitle());
+        notificationData.put("message", notification.getMessage());
+        notificationData.put("type", notification.getType());
+        notificationData.put("timestamp", notification.getTimestamp());
+        notificationData.put("read", notification.isRead());
+        notificationData.put("userId", notification.getUserId());
+        notificationData.put("eventId", notification.getEventId());
+        notificationData.put("reportId", notification.getReportId());
+        notificationData.put("targetActivity", notification.getTargetActivity());
 
-    public NotificationHelper() {
-        this.db = FirebaseFirestore.getInstance("gesdep");
-    }
-
-    // --- MÉTODO QUE FALTABA (Solución del Error) ---
-    public void sendNotificationToUser(String userId, String title, String message, String type) {
-        String id = db.collection("notifications").document().getId();
-
-        // Crear objeto compatible con tu NotificationModel
-        NotificationModel notification = new NotificationModel();
-        notification.setId(id);
-        notification.setTitle(title);
-        notification.setMessage(message);
-        notification.setType(type);
-        notification.setTimestamp(Timestamp.now());
-        notification.setRead(false);
-
-        // Guardamos un campo extra 'targetUserId' para filtrar después si es necesario
-        Map<String, Object> notifMap = new HashMap<>();
-        notifMap.put("id", id);
-        notifMap.put("title", title);
-        notifMap.put("message", message);
-        notifMap.put("type", type);
-        notifMap.put("timestamp", Timestamp.now());
-        notifMap.put("read", false);
-        notifMap.put("targetUserId", userId); // Para saber a quién pertenece
-
-        db.collection("notifications").document(id).set(notifMap)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Notificación enviada a: " + userId))
-                .addOnFailureListener(e -> Log.e(TAG, "Error enviando notificación", e));
+        db.collection("notifications").add(notificationData);
     }
 
     /**
-     * Notifica a los participantes de un evento
+     * Create event change notification
+     */
+    public static NotificationModel createEventChangeNotification(
+            String eventId, String eventName, String changeDescription, String userId) {
+        String title = "Cambios en el evento " + eventName;
+        return new NotificationModel(title, changeDescription, eventId, userId);
+    }
+
+    /**
+     * Create report notification for admin
+     */
+    public static NotificationModel createReportNotificationForAdmin(
+            String eventId, String eventName, String reportId,
+            String subject, String priority, String adminUid) {
+        String title = "Nuevo Reporte: " + eventName;
+        String message = subject + " - Prioridad: " + priority;
+        return new NotificationModel(title, message, eventId, reportId, adminUid);
+    }
+
+    /**
+     * Create report notification for participants
+     */
+    public static NotificationModel createReportNotificationForParticipants(
+            String eventId, String eventName, String reportId,
+            String subject, String participantUid) {
+        String title = "Reporte en: " + eventName;
+        return new NotificationModel(title, subject, eventId, reportId, participantUid);
+    }
+
+    /**
+     * Create status change notification
+     */
+    public static NotificationModel createStatusChangeNotification(
+            String eventId, String eventName, String reportId,
+            String newStatus, String userId) {
+        String title = "Actualización de Reporte: " + eventName;
+        String message = "El estado cambió a: " + newStatus;
+        return new NotificationModel(title, message, eventId, reportId, userId);
+    }
+
+    // Legacy methods for backwards compatibility
+
+    /**
+     * Send notification to a single user (legacy method)
+     */
+    public void sendNotificationToUser(String userId, String title, String message, String type) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance("gesdep");
+        NotificationModel notification = new NotificationModel();
+        notification.setUserId(userId);
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setType(type);
+        notification.setRead(false);
+        notification.setTimestamp(com.google.firebase.Timestamp.now());
+        saveNotification(db, notification);
+    }
+
+    /**
+     * Notify all participants of an event (legacy method)
      */
     public void notifyEventParticipants(String eventId, String title, String message) {
-        db.collection("events").document(eventId).collection("registrations")
+        FirebaseFirestore db = FirebaseFirestore.getInstance("gesdep");
+        db.collection("eventParticipants")
+                .whereEqualTo("eventId", eventId)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
-                    for (QueryDocumentSnapshot doc : querySnapshot) {
-                        String userId = doc.getString("userId");
-                        if (userId != null) {
-                            sendNotificationToUser(userId, title, message, "Aviso");
+                    querySnapshot.forEach(doc -> {
+                        String participantUid = doc.getString("userId");
+                        if (participantUid != null) {
+                            NotificationModel notification = new NotificationModel(
+                                    title, message, eventId, participantUid);
+                            saveNotification(db, notification);
                         }
-                    }
+                    });
                 });
-    }
-
-    // --- Métodos de Negocio (Llamados desde la app) ---
-
-    public void notifyEventCancelled(String eventId, String eventName, String reason) {
-        notifyEventParticipants(eventId, "⚠️ Evento Cancelado",
-                "El evento \"" + eventName + "\" ha sido cancelado.\nMotivo: " + reason);
-    }
-
-    public void notifyEventConfirmed(String eventId, String eventName) {
-        notifyEventParticipants(eventId, "✅ Evento Confirmado",
-                "El evento \"" + eventName + "\" ha sido confirmado. ¡Te esperamos!");
-    }
-
-    public void notifyEventRescheduled(String eventId, String eventName, String newDate) {
-        notifyEventParticipants(eventId, "📅 Cambio de Fecha",
-                "El evento \"" + eventName + "\" se movió al: " + newDate);
     }
 }

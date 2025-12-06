@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class UserDetailActivity extends AppCompatActivity {
 
-    private EditText etName, etEmail, etRole; // Sin teléfono
+    private EditText etName, etEmail, etRole;
     private ImageView ivProfile;
     private CardView btnChangePhoto;
     private MaterialButton btnSave, btnDelete;
@@ -48,16 +48,10 @@ public class UserDetailActivity extends AppCompatActivity {
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     selectedImageUri = result.getData().getData();
-
-                    // --- LIMPIEZA AGRESIVA DE TINTES ---
                     ivProfile.setColorFilter(null);
                     ivProfile.setImageTintList(null);
                     ivProfile.setPadding(0,0,0,0);
-
-                    Glide.with(this)
-                            .load(selectedImageUri)
-                            .apply(RequestOptions.circleCropTransform())
-                            .into(ivProfile);
+                    Glide.with(this).load(selectedImageUri).apply(RequestOptions.circleCropTransform()).into(ivProfile);
                 }
             }
     );
@@ -67,11 +61,11 @@ public class UserDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_detail);
 
+        // CRÍTICO: Asegura barra verde
         WindowUtils.setGreenStatusBar(this);
 
         db = FirebaseFirestore.getInstance("gesdep");
         storageRef = FirebaseStorage.getInstance().getReference("profile_images");
-
         user = (UserModel) getIntent().getSerializableExtra("user_data");
 
         initViews();
@@ -84,6 +78,10 @@ public class UserDetailActivity extends AppCompatActivity {
             finish();
         }
     }
+
+    // ... (Resto de métodos initViews, setupToolbar, populateData, saveChanges, etc. IGUAL QUE ANTES) ...
+    // El código Java anterior ya era correcto, solo asegúrate de que los IDs (etDetailName, etc) coincidan con el nuevo XML.
+    // A continuación repito el bloque initViews y populateData para referencia:
 
     private void initViews() {
         etName = findViewById(R.id.etDetailName);
@@ -122,20 +120,12 @@ public class UserDetailActivity extends AppCompatActivity {
         etRole.setText(user.getRole());
 
         if (user.getProfilePhotoUrl() != null && !user.getProfilePhotoUrl().isEmpty()) {
-            // --- LIMPIEZA DE TINTES AL CARGAR ---
             ivProfile.setColorFilter(null);
             ivProfile.setImageTintList(null);
             ivProfile.setPadding(0,0,0,0);
-
-            Glide.with(this)
-                    .load(user.getProfilePhotoUrl())
-                    .apply(RequestOptions.circleCropTransform())
-                    .into(ivProfile);
+            Glide.with(this).load(user.getProfilePhotoUrl()).apply(RequestOptions.circleCropTransform()).into(ivProfile);
         } else {
-            // Si no hay foto, restaurar icono por defecto
             ivProfile.setImageResource(R.drawable.ic_person);
-            // Aquí puedes aplicar un tinte gris si lo deseas para el placeholder
-            // ivProfile.setColorFilter(Color.GRAY);
             ivProfile.setPadding(50,50,50,50);
         }
     }

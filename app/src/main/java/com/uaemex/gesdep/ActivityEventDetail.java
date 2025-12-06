@@ -194,9 +194,11 @@ public class ActivityEventDetail extends AppCompatActivity implements OnMapReady
         getMenuInflater().inflate(R.menu.menu_event_detail, menu);
         MenuItem itemSwitch = menu.findItem(R.id.action_visibility);
         MenuItem itemCancel = menu.findItem(R.id.action_cancel_event);
+        MenuItem itemReport = menu.findItem(R.id.action_create_report);
 
         itemSwitch.setVisible(isAdmin);
         itemCancel.setVisible(isAdmin);
+        itemReport.setVisible(isRegistered && !isAdmin); // Solo para usuarios registrados que no sean admin
 
         if (isAdmin && itemSwitch.getActionView() != null) {
             SwitchMaterial switchVisibility = itemSwitch.getActionView().findViewById(R.id.switchVisibility);
@@ -228,8 +230,23 @@ public class ActivityEventDetail extends AppCompatActivity implements OnMapReady
         if (item.getItemId() == R.id.action_cancel_event) {
             toggleEventCancellationStatus();
             return true;
+        } else if (item.getItemId() == R.id.action_create_report) {
+            openCreateReport();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openCreateReport() {
+        if (currentEvent == null) {
+            Toast.makeText(this, "Error: Evento no cargado", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, CreateReportActivity.class);
+        intent.putExtra("eventId", currentEvent.getId());
+        intent.putExtra("eventName", currentEvent.getTitle());
+        startActivity(intent);
     }
 
     private void updateSwitchText(SwitchMaterial switchMaterial) {

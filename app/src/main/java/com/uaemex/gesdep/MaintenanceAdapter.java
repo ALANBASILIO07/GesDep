@@ -29,9 +29,10 @@ public class MaintenanceAdapter extends RecyclerView.Adapter<MaintenanceAdapter.
     @Override
     public void onBindViewHolder(@NonNull ReportViewHolder holder, int position) {
         MaintenanceReport r = reports.get(position);
-        holder.tvTitle.setText(r.getTitle());
-        holder.tvStatus.setText("Estado: " + r.getStatus());
-        holder.tvLocation.setText("Ubicación: " + r.getLocation());
+        holder.tvSubject.setText(r.getTitle());
+        holder.tvStatus.setText(r.getStatus());
+        holder.tvEventName.setText(r.getLocation());
+        holder.tvCategory.setText("Mantenimiento");
     }
 
     @Override
@@ -45,13 +46,14 @@ public class MaintenanceAdapter extends RecyclerView.Adapter<MaintenanceAdapter.
     }
 
     static class ReportViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvStatus, tvLocation;
+        TextView tvSubject, tvStatus, tvEventName, tvCategory;
 
         public ReportViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvTitle = itemView.findViewById(R.id.tvReportTitle);
-            tvStatus = itemView.findViewById(R.id.tvReportStatus);
-            tvLocation = itemView.findViewById(R.id.tvReportLocation);
+            tvSubject = itemView.findViewById(R.id.tvSubject);
+            tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvEventName = itemView.findViewById(R.id.tvEventName);
+            tvCategory = itemView.findViewById(R.id.tvCategory);
         }
     }
 }

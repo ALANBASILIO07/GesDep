@@ -33,4 +33,11 @@
     <color name="text_secondary_color">@color/gray_text</color>
     <color name="icon_tint_color">@color/green_primary</color>
 
+    <!-- Aliases for layouts -->
+    <color name="background">@color/screen_background_color</color>
+    <color name="text_primary">@color/text_primary_color</color>
+    <color name="text_secondary">@color/text_secondary_color</color>
+    <color name="primary">@color/green_primary</color>
+    <color name="error">@color/red_error</color>
+
 </resources>

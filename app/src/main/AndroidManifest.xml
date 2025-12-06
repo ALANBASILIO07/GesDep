@@ -55,7 +55,6 @@
         <activity android:name=".MaintenanceActivity" android:exported="false" />
 
         <activity android:name=".ParticipantsActivity" android:exported="false" />
-
         <activity android:name=".UserDetailActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
@@ -63,10 +62,14 @@
 
         <activity android:name=".CoachesActivity" android:exported="false" />
         <activity android:name=".AttendanceActivity" android:exported="false" />
-
         <activity android:name=".GalleryActivity" android:exported="false" android:label="Galería"/>
-
         <activity android:name=".MapEventsActivity" android:exported="false" android:label="Mapa de Eventos"/>
+
+        <activity android:name=".CreateReportActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".ReportsListActivity" android:exported="false" />
+        <activity android:name=".ReportDetailActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
+
+        <activity android:name=".SettingsActivity" android:exported="false" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
