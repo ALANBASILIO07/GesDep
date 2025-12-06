@@ -47,4 +47,10 @@
         <item>Fianza</item>
     </string-array>
 
+    <string-array name="event_registration_types">
+        <item>Individual</item>
+        <item>Por Equipo</item>
+        <item>Ambos</item>
+    </string-array>
+
 </resources>

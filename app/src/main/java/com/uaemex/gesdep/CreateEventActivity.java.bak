@@ -59,7 +59,6 @@ public class CreateEventActivity extends AppCompatActivity {
 
     // Dropdowns
     private AutoCompleteTextView dropdownCategory, dropdownDiscipline, dropdownModality, dropdownVenue;
-    private AutoCompleteTextView dropdownCoach, dropdownRegistrationType;
 
     // Botones y Multimedia
     private MaterialButton btnPublishEvent, btnAddPhotos;
@@ -78,9 +77,6 @@ public class CreateEventActivity extends AppCompatActivity {
     private List<VenueModel> venueList = new ArrayList<>();
     private VenueModel selectedVenue = null;
     private double selectedLat = 0.0;
-    // Coach data
-    private List<DocumentSnapshot> coachList = new ArrayList<>();
-    private DocumentSnapshot selectedCoach = null;
     private double selectedLng = 0.0;
 
     // Multimedia Uris
@@ -136,7 +132,6 @@ public class CreateEventActivity extends AppCompatActivity {
         setupRecyclerView();
         setupListeners();
         loadVenues();
-        loadCoaches();
     }
 
     private void initViews() {
@@ -153,8 +148,6 @@ public class CreateEventActivity extends AppCompatActivity {
 
         dropdownCategory = findViewById(R.id.dropdownCategory);
         dropdownDiscipline = findViewById(R.id.dropdownDiscipline);
-        dropdownCoach = findViewById(R.id.dropdownCoach);
-        dropdownRegistrationType = findViewById(R.id.dropdownRegistrationType);
         dropdownModality = findViewById(R.id.dropdownModality);
         dropdownVenue = findViewById(R.id.dropdownVenue);
 
@@ -177,7 +170,6 @@ public class CreateEventActivity extends AppCompatActivity {
 
     private void setupDropdowns() {
         setAdapterFromResource(dropdownCategory, R.array.event_categories);
-        setAdapterFromResource(dropdownRegistrationType, R.array.event_registration_types);
         setAdapterFromResource(dropdownDiscipline, R.array.event_disciplines);
         setAdapterFromResource(dropdownModality, R.array.event_modalities);
         setAdapterFromResource(dropdownPaymentType, R.array.event_payment_types);
@@ -205,24 +197,6 @@ public class CreateEventActivity extends AppCompatActivity {
         });
     }
 
-    private void loadCoaches() {
-        db.collection("users").whereEqualTo("role", "coach").get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    coachList.clear();
-                    List<String> coachNames = new ArrayList<>();
-                    coachNames.add("-- Sin asignar --");
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        coachList.add(doc);
-                        String name = doc.getString("name");
-                        if (name != null && !name.isEmpty()) {
-                            coachNames.add(name);
-                        }
-                    }
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, coachNames);
-                    dropdownCoach.setAdapter(adapter);
-                });
-    }
-
     private void setupRecyclerView() {
         galleryAdapter = new GalleryAdapter(galleryUris);
         rvEventImages.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -244,15 +218,6 @@ public class CreateEventActivity extends AppCompatActivity {
                     selectedLng = v.getLongitude();
                     break;
                 }
-            }
-        });
-
-        dropdownCoach.setOnItemClickListener((parent, view, position, id) -> {
-            String selection = (String) parent.getItemAtPosition(position);
-            if (selection.equals("-- Sin asignar --") || position == 0) {
-                selectedCoach = null;
-            } else {
-                selectedCoach = coachList.get(position - 1);
             }
         });
 
@@ -446,25 +411,6 @@ public class CreateEventActivity extends AppCompatActivity {
 
         event.setCreatedAt(new Date()); // Date actual
         event.setImageUrls(imageUrls);
-
-        // Coach assignment
-        if (selectedCoach != null) {
-            event.setCoachId(selectedCoach.getId());
-            event.setCoachName(selectedCoach.getString("name"));
-            event.setCoachEmail(selectedCoach.getString("email"));
-        }
-
-        // Registration type
-        String regType = dropdownRegistrationType.getText().toString();
-        if (regType.equals("Individual")) {
-            event.setRegistrationType("individual");
-        } else if (regType.equals("Por Equipo")) {
-            event.setRegistrationType("team");
-        } else if (regType.equals("Ambos")) {
-            event.setRegistrationType("both");
-        } else {
-            event.setRegistrationType("individual");
-        }
 
         db.collection("events").add(event)
                 .addOnSuccessListener(docRef -> {

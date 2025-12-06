@@ -161,6 +161,53 @@
                 style="@style/DashboardTextStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Responsable e Inscripciones"
+                android:textColor="@color/green_primary"
+                android:textAlignment="viewStart"
+                android:layout_marginBottom="8dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/DashboardCardStyle"
+                android:layout_marginBottom="24dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:hint="Entrenador Responsable (Opcional)"
+                        android:layout_marginBottom="12dp">
+                        <AutoCompleteTextView
+                            android:id="@+id/dropdownCoach"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textColor="@color/text_primary_color"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:hint="Tipo de Inscripción">
+                        <AutoCompleteTextView
+                            android:id="@+id/dropdownRegistrationType"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:text="Individual"
+                            android:textColor="@color/text_primary_color"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <TextView
+                style="@style/DashboardTextStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="Logística y Horarios"
                 android:textColor="@color/green_primary"
                 android:textAlignment="viewStart"

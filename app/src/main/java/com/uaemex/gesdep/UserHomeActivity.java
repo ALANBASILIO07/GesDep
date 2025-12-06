@@ -166,6 +166,15 @@ public class UserHomeActivity extends AppCompatActivity implements NavigationVie
     private void loadDashboardData() {
         String userId = auth.getCurrentUser().getUid();
 
+        // Cargar saldo
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(doc -> {
+                    Double credit = doc.getDouble("appCredit");
+                    if (credit == null) credit = 0.0;
+                    java.text.NumberFormat format = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("es", "MX"));
+                    tvCurrentCredit.setText(format.format(credit));
+                });
+
         // Cargar inscripciones
         db.collection("eventParticipants")
                 .whereEqualTo("userId", userId)
@@ -201,6 +210,16 @@ public class UserHomeActivity extends AppCompatActivity implements NavigationVie
                     }
                     tvCountTeams.setText(String.valueOf(count));
                 });
+
+        // Cargar reportes creados por el usuario
+        db.collection("reports")
+                .whereEqualTo("reporterId", userId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    int count = querySnapshot.size();
+                    tvCountReports.setText(String.valueOf(count));
+                })
+                .addOnFailureListener(e -> tvCountReports.setText("0"));
     }
 
     private void loadLiveEvents() {

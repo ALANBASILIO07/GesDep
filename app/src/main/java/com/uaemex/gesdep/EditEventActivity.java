@@ -52,6 +52,7 @@ public class EditEventActivity extends AppCompatActivity {
     private TextInputEditText etDate, etStartTime, etEndTime, etDeadlineDate;
     private SwitchMaterial switchPaidEvent;
     private LinearLayout containerPaymentDetails;
+    private AutoCompleteTextView dropdownCoach, dropdownRegistrationType;
     private AutoCompleteTextView dropdownPaymentType, dropdownCategory, dropdownDiscipline, dropdownModality, dropdownVenue;
     private TextInputEditText etCost;
     private MaterialButton btnSaveChanges, btnAddPhotos;
@@ -68,6 +69,9 @@ public class EditEventActivity extends AppCompatActivity {
 
     private List<VenueModel> venueList = new ArrayList<>();
     private VenueModel selectedVenue = null;
+    // Coach data
+    private List<DocumentSnapshot> coachList = new ArrayList<>();
+    private DocumentSnapshot selectedCoach = null;
     private EventModel currentEvent;
     private String originalVenueName;
     private Date originalStartTime;
@@ -159,6 +163,8 @@ public class EditEventActivity extends AppCompatActivity {
         rvEventImages = findViewById(R.id.rvEventImages);
         loadingOverlay = findViewById(R.id.loadingOverlay);
         findViewById(R.id.toolbar).setOnClickListener(v -> finish());
+        dropdownCoach = findViewById(R.id.dropdownCoach);
+        dropdownRegistrationType = findViewById(R.id.dropdownRegistrationType);
     }
 
     private void setupRecyclerView() {
@@ -190,6 +196,7 @@ public class EditEventActivity extends AppCompatActivity {
         setAdapterFromResource(dropdownDiscipline, R.array.event_disciplines);
         setAdapterFromResource(dropdownModality, R.array.event_modalities);
         setAdapterFromResource(dropdownPaymentType, R.array.event_payment_types);
+        setAdapterFromResource(dropdownRegistrationType, R.array.event_registration_types);
     }
 
     private void setAdapterFromResource(AutoCompleteTextView dropdown, int arrayResId) {
@@ -212,7 +219,53 @@ public class EditEventActivity extends AppCompatActivity {
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, venueNames);
             dropdownVenue.setAdapter(adapter);
             fillFormWithEventData();
+            loadCoaches();
         });
+    }
+
+    private void loadCoaches() {
+        db.collection("users").whereEqualTo("role", "coach").get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    coachList.clear();
+                    List<String> coachNames = new ArrayList<>();
+                    coachNames.add("-- Sin asignar --");
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        coachList.add(doc);
+                        String name = doc.getString("name");
+                        if (name != null && !name.isEmpty()) {
+                            coachNames.add(name);
+                        }
+                    }
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, coachNames);
+                    dropdownCoach.setAdapter(adapter);
+                    fillCoachData();
+                });
+    }
+
+    private void fillCoachData() {
+        if (currentEvent != null && currentEvent.getCoachId() != null && !currentEvent.getCoachId().isEmpty()) {
+            dropdownCoach.setText(currentEvent.getCoachName(), false);
+            for (int i = 0; i < coachList.size(); i++) {
+                if (coachList.get(i).getId().equals(currentEvent.getCoachId())) {
+                    selectedCoach = coachList.get(i);
+                    break;
+                }
+            }
+        } else {
+            dropdownCoach.setText("-- Sin asignar --", false);
+        }
+
+        // Fill registration type
+        String regType = currentEvent != null ? currentEvent.getRegistrationType() : "individual";
+        if ("individual".equals(regType)) {
+            dropdownRegistrationType.setText("Individual", false);
+        } else if ("team".equals(regType)) {
+            dropdownRegistrationType.setText("Por Equipo", false);
+        } else if ("both".equals(regType)) {
+            dropdownRegistrationType.setText("Ambos", false);
+        } else {
+            dropdownRegistrationType.setText("Individual", false);
+        }
     }
 
     private void fillFormWithEventData() {
@@ -295,6 +348,15 @@ public class EditEventActivity extends AppCompatActivity {
                     selectedVenue = v;
                     break;
                 }
+            }
+        });
+
+        dropdownCoach.setOnItemClickListener((parent, view, position, id) -> {
+            String selection = (String) parent.getItemAtPosition(position);
+            if (selection.equals("-- Sin asignar --") || position == 0) {
+                selectedCoach = null;
+            } else {
+                selectedCoach = coachList.get(position - 1);
             }
         });
 
@@ -470,6 +532,29 @@ public class EditEventActivity extends AppCompatActivity {
         } catch (Exception e) {}
 
         currentEvent.setImageUrls(imageUrls);
+
+        // Coach assignment
+        if (selectedCoach != null) {
+            currentEvent.setCoachId(selectedCoach.getId());
+            currentEvent.setCoachName(selectedCoach.getString("name"));
+            currentEvent.setCoachEmail(selectedCoach.getString("email"));
+        } else {
+            currentEvent.setCoachId(null);
+            currentEvent.setCoachName(null);
+            currentEvent.setCoachEmail(null);
+        }
+
+        // Registration type
+        String regType = dropdownRegistrationType.getText().toString();
+        if (regType.equals("Individual")) {
+            currentEvent.setRegistrationType("individual");
+        } else if (regType.equals("Por Equipo")) {
+            currentEvent.setRegistrationType("team");
+        } else if (regType.equals("Ambos")) {
+            currentEvent.setRegistrationType("both");
+        } else {
+            currentEvent.setRegistrationType("individual");
+        }
 
         db.collection("events").document(currentEvent.getId())
                 .set(currentEvent)

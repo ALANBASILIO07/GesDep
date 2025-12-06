@@ -166,6 +166,15 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
     private void loadDashboardData() {
         String coachId = auth.getCurrentUser().getUid();
 
+        // Cargar saldo
+        db.collection("users").document(coachId).get()
+                .addOnSuccessListener(doc -> {
+                    Double credit = doc.getDouble("appCredit");
+                    if (credit == null) credit = 0.0;
+                    java.text.NumberFormat format = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("es", "MX"));
+                    tvCurrentCredit.setText(format.format(credit));
+                });
+
         // Cargar equipos
         db.collection("teams")
                 .whereEqualTo("coachId", coachId)
@@ -192,6 +201,16 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
                     int count = querySnapshot.size();
                     tvCountEnrollments.setText(String.valueOf(count));
                 });
+
+        // Cargar reportes creados por el coach
+        db.collection("reports")
+                .whereEqualTo("reporterId", coachId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    int count = querySnapshot.size();
+                    tvCountReports.setText(String.valueOf(count));
+                })
+                .addOnFailureListener(e -> tvCountReports.setText("0"));
     }
 
     private void loadLiveEvents() {

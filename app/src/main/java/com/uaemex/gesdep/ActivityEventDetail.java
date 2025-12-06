@@ -56,7 +56,7 @@ public class ActivityEventDetail extends AppCompatActivity implements OnMapReady
 
     // Vistas
     private CollapsingToolbarLayout collapsingToolbar;
-    private TextView tvEventTitle, tvEventDate, tvEventTime, tvCostAmount, tvCostConcept, tvEventDescription, tvEventLocation, tvParticipantsCount;
+    private TextView tvEventTitle, tvEventDate, tvEventTime, tvCostAmount, tvCostConcept, tvEventDescription, tvEventLocation, tvCoachLabel, tvCoachName, tvParticipantsCount;
     private Chip chipCategory, chipDiscipline, chipStatus, chipCost;
     private ImageView ivEventBanner;
     private ProgressBar pbQuota;
@@ -308,6 +308,8 @@ public class ActivityEventDetail extends AppCompatActivity implements OnMapReady
         tvCostConcept = findViewById(R.id.tvCostConcept);
         tvEventDescription = findViewById(R.id.tvEventDescription);
         tvEventLocation = findViewById(R.id.tvEventLocation);
+        tvCoachLabel = findViewById(R.id.tvCoachLabel);
+        tvCoachName = findViewById(R.id.tvCoachName);
         chipCategory = findViewById(R.id.chipCategory);
         chipDiscipline = findViewById(R.id.chipDiscipline);
         chipStatus = findViewById(R.id.chipStatus);
@@ -579,6 +581,16 @@ public class ActivityEventDetail extends AppCompatActivity implements OnMapReady
         tvEventTitle.setText(event.getTitle());
         collapsingToolbar.setTitle(event.getTitle());
         tvEventDescription.setText(event.getDescription());
+
+        // Display coach if assigned
+        if (event.getCoachName() != null && !event.getCoachName().isEmpty()) {
+            tvCoachLabel.setVisibility(View.VISIBLE);
+            tvCoachName.setVisibility(View.VISIBLE);
+            tvCoachName.setText(event.getCoachName());
+        } else {
+            tvCoachLabel.setVisibility(View.GONE);
+            tvCoachName.setVisibility(View.GONE);
+        }
         tvEventLocation.setText(event.getPlaceName());
         chipCategory.setText(event.getCategory());
 
