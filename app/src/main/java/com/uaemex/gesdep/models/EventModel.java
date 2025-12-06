@@ -43,6 +43,14 @@ public class EventModel implements Serializable {
     private String organizerId;
     private String organizerName;
 
+    // Coach/Instructor asignado al evento
+    private String coachId;
+    private String coachName;
+    private String coachEmail;
+
+    // Tipo de inscripción permitida: "individual", "team", "both"
+    private String registrationType = "individual";
+
     private boolean visible = true; // Por defecto es visible al crear
 
     // Getter y Setter
@@ -129,6 +137,18 @@ public class EventModel implements Serializable {
     public void setOrganizerName(String organizerName) { this.organizerName = organizerName; }
     public List<String> getImageUrls() { return imageUrls; }
     public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
+
+    // Getters y Setters para Coach
+    public String getCoachId() { return coachId; }
+    public void setCoachId(String coachId) { this.coachId = coachId; }
+    public String getCoachName() { return coachName; }
+    public void setCoachName(String coachName) { this.coachName = coachName; }
+    public String getCoachEmail() { return coachEmail; }
+    public void setCoachEmail(String coachEmail) { this.coachEmail = coachEmail; }
+
+    // Getter y Setter para tipo de registro
+    public String getRegistrationType() { return registrationType; }
+    public void setRegistrationType(String registrationType) { this.registrationType = registrationType; }
 
     // Lógica con Dates
     @Exclude

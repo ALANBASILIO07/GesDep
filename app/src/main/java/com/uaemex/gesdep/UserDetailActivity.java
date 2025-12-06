@@ -16,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat; // Importante
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -48,10 +49,17 @@ public class UserDetailActivity extends AppCompatActivity {
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     selectedImageUri = result.getData().getData();
+
+                    // AL SELECCIONAR FOTO: LIMPIEZA TOTAL
                     ivProfile.setColorFilter(null);
                     ivProfile.setImageTintList(null);
-                    ivProfile.setPadding(0,0,0,0);
-                    Glide.with(this).load(selectedImageUri).apply(RequestOptions.circleCropTransform()).into(ivProfile);
+                    ivProfile.setPadding(0, 0, 0, 0);
+                    ivProfile.setBackground(null);
+
+                    Glide.with(this)
+                            .load(selectedImageUri)
+                            .apply(RequestOptions.circleCropTransform())
+                            .into(ivProfile);
                 }
             }
     );
@@ -61,7 +69,6 @@ public class UserDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_detail);
 
-        // CRÍTICO: Asegura barra verde
         WindowUtils.setGreenStatusBar(this);
 
         db = FirebaseFirestore.getInstance("gesdep");
@@ -78,10 +85,6 @@ public class UserDetailActivity extends AppCompatActivity {
             finish();
         }
     }
-
-    // ... (Resto de métodos initViews, setupToolbar, populateData, saveChanges, etc. IGUAL QUE ANTES) ...
-    // El código Java anterior ya era correcto, solo asegúrate de que los IDs (etDetailName, etc) coincidan con el nuevo XML.
-    // A continuación repito el bloque initViews y populateData para referencia:
 
     private void initViews() {
         etName = findViewById(R.id.etDetailName);
@@ -119,88 +122,83 @@ public class UserDetailActivity extends AppCompatActivity {
         etEmail.setText(user.getEmail());
         etRole.setText(user.getRole());
 
+        // --- LÓGICA DE FOTO CORREGIDA PARA EFECTO TROFEO ---
         if (user.getProfilePhotoUrl() != null && !user.getProfilePhotoUrl().isEmpty()) {
+            // SI HAY FOTO: LIMPIEZA
             ivProfile.setColorFilter(null);
             ivProfile.setImageTintList(null);
-            ivProfile.setPadding(0,0,0,0);
-            Glide.with(this).load(user.getProfilePhotoUrl()).apply(RequestOptions.circleCropTransform()).into(ivProfile);
+            ivProfile.setPadding(0, 0, 0, 0);
+            ivProfile.setBackground(null);
+
+            Glide.with(this)
+                    .load(user.getProfilePhotoUrl())
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(ivProfile);
         } else {
-            ivProfile.setImageResource(R.drawable.ic_person);
-            ivProfile.setPadding(50,50,50,50);
+            // NO HAY FOTO: ESTILO TROFEO VERDE
+            // Padding grande para esta vista (25dp aprox)
+            int padding = (int) (25 * getResources().getDisplayMetrics().density);
+            ivProfile.setPadding(padding, padding, padding, padding);
+
+            // Trofeo Blanco
+            ivProfile.setColorFilter(ContextCompat.getColor(this, android.R.color.white));
+            ivProfile.setImageResource(R.drawable.ic_trophy);
+
+            // Fondo Verde
+            ivProfile.setBackgroundResource(R.drawable.bg_circle_green);
         }
     }
+
+    // ... (Métodos saveChanges, uploadImageAndThenUpdate, updateUserInFirestore, confirmDelete IGUALES) ...
+    // Solo cópialos de tu versión anterior, la lógica no cambia.
 
     private void saveChanges() {
         progressBar.setVisibility(View.VISIBLE);
         btnSave.setEnabled(false);
-
-        if (selectedImageUri != null) {
-            uploadImageAndThenUpdate();
-        } else {
-            updateUserInFirestore(null);
-        }
+        if (selectedImageUri != null) uploadImageAndThenUpdate();
+        else updateUserInFirestore(null);
     }
 
     private void uploadImageAndThenUpdate() {
         StorageReference fileRef = storageRef.child(user.getUid() + ".jpg");
-
-        fileRef.putFile(selectedImageUri)
-                .addOnSuccessListener(taskSnapshot -> {
-                    fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        updateUserInFirestore(uri.toString());
-                    });
-                })
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    btnSave.setEnabled(true);
-                    Toast.makeText(this, "Error al subir imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        fileRef.putFile(selectedImageUri).addOnSuccessListener(taskSnapshot ->
+                fileRef.getDownloadUrl().addOnSuccessListener(uri -> updateUserInFirestore(uri.toString()))
+        ).addOnFailureListener(e -> {
+            progressBar.setVisibility(View.GONE);
+            btnSave.setEnabled(true);
+            Toast.makeText(this, "Error subiendo imagen", Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void updateUserInFirestore(String newPhotoUrl) {
         String newName = etName.getText().toString().trim();
         String newRole = etRole.getText().toString().trim().toLowerCase();
-
         Map<String, Object> updates = new HashMap<>();
         updates.put("name", newName);
         updates.put("role", newRole);
+        if (newPhotoUrl != null) updates.put("photoUrl", newPhotoUrl);
 
-        if (newPhotoUrl != null) {
-            updates.put("photoUrl", newPhotoUrl);
-        }
-
-        db.collection("users").document(user.getUid())
-                .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(this, "Usuario actualizado", Toast.LENGTH_SHORT).show();
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    btnSave.setEnabled(true);
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        db.collection("users").document(user.getUid()).update(updates).addOnSuccessListener(aVoid -> {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, "Actualizado", Toast.LENGTH_SHORT).show();
+            finish();
+        }).addOnFailureListener(e -> {
+            progressBar.setVisibility(View.GONE);
+            btnSave.setEnabled(true);
+        });
     }
 
     private void confirmDelete() {
         new AlertDialog.Builder(this)
                 .setTitle("Eliminar Usuario")
-                .setMessage("¿Estás seguro de eliminar a " + user.getName() + "?")
+                .setMessage("¿Estás seguro?")
                 .setPositiveButton("ELIMINAR", (dialog, which) -> {
                     progressBar.setVisibility(View.VISIBLE);
-                    db.collection("users").document(user.getUid())
-                            .delete()
-                            .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(this, "Eliminado", Toast.LENGTH_SHORT).show();
-                                finish();
-                            })
-                            .addOnFailureListener(e -> {
-                                progressBar.setVisibility(View.GONE);
-                                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            });
+                    db.collection("users").document(user.getUid()).delete().addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Eliminado", Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
                 })
-                .setNegativeButton("Cancelar", null)
-                .show();
+                .setNegativeButton("Cancelar", null).show();
     }
 }

@@ -7,11 +7,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-// CAMBIO DE IMPORTACIÓN AQUÍ:
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat; // Importación correcta para el Switch
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
@@ -19,7 +18,6 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
-// import com.google.android.material.materialswitch.MaterialSwitch; // <-- ELIMINAR ESTE
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,7 +32,7 @@ public class SettingsActivity extends AppCompatActivity {
     private ImageView ivUserProfile;
     private TextView tvUserName;
 
-    // CAMBIO DE TIPO AQUÍ:
+    // Usamos SwitchCompat para evitar crash de estilos con MaterialSwitch
     private SwitchCompat switchDarkMode;
 
     private LinearLayout btnChangePassword, btnAbout;
@@ -49,6 +47,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        // Asegura que el Status Bar se vea verde
         WindowUtils.setGreenStatusBar(this);
 
         auth = FirebaseAuth.getInstance();
@@ -63,6 +62,7 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Recargar datos por si se editó el perfil y se regresó a esta pantalla
         loadUserProfile();
     }
 
@@ -74,22 +74,23 @@ public class SettingsActivity extends AppCompatActivity {
         cardProfile = findViewById(R.id.cardProfile);
         ivUserProfile = findViewById(R.id.ivUserProfile);
         tvUserName = findViewById(R.id.tvUserName);
-
-        // CAMBIO DE CASTING (Aunque findViewById lo infiere, es bueno saberlo)
         switchDarkMode = findViewById(R.id.switchDarkMode);
-
         btnChangePassword = findViewById(R.id.btnChangePassword);
         btnAbout = findViewById(R.id.btnAbout);
         btnLogout = findViewById(R.id.btnLogout);
     }
 
     private void setupThemeSwitch() {
+        // Obtener tema actual guardado (0=System, 1=Light, 2=Dark)
         int currentMode = ThemeManager.getStoredTheme(this);
+
+        // Si el modo es NOCHE (2), activamos el switch
         switchDarkMode.setChecked(currentMode == AppCompatDelegate.MODE_NIGHT_YES);
 
         switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
             int newMode = isChecked ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
             ThemeManager.saveThemeSelection(this, newMode);
+            // El cambio de tema recreará la actividad automáticamente
         });
     }
 
@@ -100,32 +101,45 @@ public class SettingsActivity extends AppCompatActivity {
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
+                        // Parseo manual seguro de datos básicos
                         currentUserModel = new UserModel();
                         currentUserModel.setUid(uid);
                         currentUserModel.setName(documentSnapshot.getString("name"));
                         currentUserModel.setEmail(documentSnapshot.getString("email"));
                         currentUserModel.setRole(documentSnapshot.getString("role"));
 
+                        // Intentar obtener foto de ambos campos posibles
                         String photoUrl = documentSnapshot.getString("photoUrl");
                         if(photoUrl == null) photoUrl = documentSnapshot.getString("profilePhotoUrl");
                         currentUserModel.setProfilePhotoUrl(photoUrl);
 
+                        // Actualizar UI
                         tvUserName.setText(currentUserModel.getName());
 
+                        // --- LÓGICA DE FOTO INTELIGENTE ---
                         if (photoUrl != null && !photoUrl.isEmpty()) {
+                            // CASO: FOTO REAL -> Limpieza TOTAL de estilos
                             ivUserProfile.setPadding(0,0,0,0);
                             ivUserProfile.setColorFilter(null);
-                            ivUserProfile.setBackground(null);
+                            ivUserProfile.setImageTintList(null); // CRÍTICO para evitar tinte blanco
+                            ivUserProfile.setBackground(null);    // Quitar círculo verde
 
                             Glide.with(this)
                                     .load(photoUrl)
                                     .apply(RequestOptions.circleCropTransform())
                                     .into(ivUserProfile);
                         } else {
+                            // CASO: SIN FOTO -> Estilo Trofeo Verde
                             ivUserProfile.setImageResource(R.drawable.ic_trophy);
+
+                            // Padding dinámico (12dp)
                             int padding = (int) (12 * getResources().getDisplayMetrics().density);
                             ivUserProfile.setPadding(padding, padding, padding, padding);
+
+                            // Tinte BLANCO para el icono
                             ivUserProfile.setColorFilter(ContextCompat.getColor(this, android.R.color.white));
+
+                            // Fondo VERDE circular
                             ivUserProfile.setBackgroundResource(R.drawable.bg_circle_green);
                         }
                     }
@@ -133,6 +147,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
+        // Ir a editar perfil
         cardProfile.setOnClickListener(v -> {
             if (currentUserModel != null) {
                 Intent intent = new Intent(this, UserDetailActivity.class);
@@ -141,6 +156,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        // Cambiar contraseña (Email de Firebase)
         btnChangePassword.setOnClickListener(v -> {
             String email = auth.getCurrentUser().getEmail();
             new AlertDialog.Builder(this)
@@ -155,14 +171,16 @@ public class SettingsActivity extends AppCompatActivity {
                     .show();
         });
 
+        // Acerca de
         btnAbout.setOnClickListener(v -> {
             new AlertDialog.Builder(this)
                     .setTitle("Acerca de GESDEP")
-                    .setMessage("Sistema de Gestión Deportiva UAEMex.\nVersión 1.0.0\nDesarrollado por: \nAlan Osvaldo Basilio Delgado\nGustavo Olmedo Alarcón\nJorge Manuel García Vera")
+                    .setMessage("Sistema de Gestión Deportiva UAEMex.\nVersión 1.0.0\n\nDesarrollado por:\nAlan Osvaldo Basilio Delgado\nGustavo Olmedo Alarcón\nJorge Manuel García Vera")
                     .setPositiveButton("Aceptar", null)
                     .show();
         });
 
+        // Cerrar Sesión
         btnLogout.setOnClickListener(v -> {
             auth.signOut();
             Intent intent = new Intent(this, WelcomeActivity.class);

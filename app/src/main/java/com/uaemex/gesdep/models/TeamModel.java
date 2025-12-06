@@ -1,26 +1,27 @@
 package com.uaemex.gesdep.models;
 
 import com.google.firebase.Timestamp;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Modelo de Equipo para eventos deportivos/culturales
- * Representa un equipo registrado en un evento (ej: equipo de fútbol, grupo de danza)
+ * Modelo de Equipo PERMANENTE para eventos deportivos/culturales
+ * Representa un equipo creado por un coach que puede inscribirse a múltiples eventos
  */
-public class TeamModel {
+public class TeamModel implements Serializable {
 
     // Identificación
     public String id;
     public String teamName;
-    public String eventId;
-    public String eventName;
+    public String discipline; // Fútbol, Básquetbol, Voleibol, etc.
+    public String category; // Varonil, Femenil, Mixto
 
-    // Responsable del equipo (Team Leader)
-    public String leaderId;
-    public String leaderName;
-    public String leaderEmail;
-    public String leaderPhone;
+    // Responsable del equipo (Coach/Entrenador)
+    public String coachId;
+    public String coachName;
+    public String coachEmail;
+    public String coachPhone;
 
     // Miembros del equipo
     public List<TeamMember> members;
@@ -28,9 +29,9 @@ public class TeamModel {
     public int maxMembers; // Máximo de miembros permitidos (ej: 11 para fútbol 11)
     public int currentMembers; // Número actual de miembros
 
-    // Estado del registro
-    public String status; // "confirmed", "pending", "cancelled"
-    public Timestamp registeredAt;
+    // Estado del equipo
+    public String status; // "active", "inactive"
+    public Timestamp createdAt;
     public Timestamp lastModified;
 
     // Información adicional
@@ -38,31 +39,36 @@ public class TeamModel {
     public String institution; // Escuela, empresa, comunidad que representa
     public String notes;
 
+    // Lista de eventos a los que está inscrito (IDs)
+    public List<String> enrolledEventIds;
+
     // Constructor vacío requerido por Firestore
     public TeamModel() {
         this.members = new ArrayList<>();
-        this.status = "confirmed";
+        this.enrolledEventIds = new ArrayList<>();
+        this.status = "active";
         this.currentMembers = 0;
     }
 
     // Constructor completo
-    public TeamModel(String id, String teamName, String eventId, String eventName,
-                     String leaderId, String leaderName, String leaderEmail, String leaderPhone,
+    public TeamModel(String id, String teamName, String discipline, String category,
+                     String coachId, String coachName, String coachEmail, String coachPhone,
                      int minMembers, int maxMembers) {
         this.id = id;
         this.teamName = teamName;
-        this.eventId = eventId;
-        this.eventName = eventName;
-        this.leaderId = leaderId;
-        this.leaderName = leaderName;
-        this.leaderEmail = leaderEmail;
-        this.leaderPhone = leaderPhone;
+        this.discipline = discipline;
+        this.category = category;
+        this.coachId = coachId;
+        this.coachName = coachName;
+        this.coachEmail = coachEmail;
+        this.coachPhone = coachPhone;
         this.minMembers = minMembers;
         this.maxMembers = maxMembers;
         this.members = new ArrayList<>();
+        this.enrolledEventIds = new ArrayList<>();
         this.currentMembers = 0;
-        this.status = "confirmed";
-        this.registeredAt = Timestamp.now();
+        this.status = "active";
+        this.createdAt = Timestamp.now();
         this.lastModified = Timestamp.now();
     }
 
@@ -116,10 +122,40 @@ public class TeamModel {
     }
 
     /**
+     * Inscribe el equipo a un evento
+     */
+    public boolean enrollInEvent(String eventId) {
+        if (!enrolledEventIds.contains(eventId)) {
+            enrolledEventIds.add(eventId);
+            lastModified = Timestamp.now();
+            return true;
+        }
+        return false; // Ya está inscrito
+    }
+
+    /**
+     * Desinscribe el equipo de un evento
+     */
+    public boolean unenrollFromEvent(String eventId) {
+        if (enrolledEventIds.remove(eventId)) {
+            lastModified = Timestamp.now();
+            return true;
+        }
+        return false; // No estaba inscrito
+    }
+
+    /**
+     * Verifica si el equipo está inscrito en un evento
+     */
+    public boolean isEnrolledInEvent(String eventId) {
+        return enrolledEventIds != null && enrolledEventIds.contains(eventId);
+    }
+
+    /**
      * Clase interna para representar un miembro del equipo
      */
-    public static class TeamMember {
-        public String id;
+    public static class TeamMember implements Serializable {
+        public String id; // UID del usuario
         public String name;
         public String email;
         public String phone;
@@ -127,6 +163,7 @@ public class TeamModel {
         public String position; // Posición en el equipo (delantero, defensa, etc.)
         public String documentId; // INE, CURP, etc.
         public boolean isCaptain;
+        public Timestamp joinedAt;
 
         public TeamMember() {}
 
@@ -138,6 +175,7 @@ public class TeamModel {
             this.age = age;
             this.position = position;
             this.isCaptain = false;
+            this.joinedAt = Timestamp.now();
         }
     }
 }

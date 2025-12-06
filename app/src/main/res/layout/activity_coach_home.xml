@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout_coach"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:openDrawer="start">
@@ -17,18 +17,45 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
-            app:elevation="0dp"
-            android:background="@color/green_primary">
+            android:background="@color/green_primary"
+            android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
 
             <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbarCoach"
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@android:color/transparent"
-                app:title="GESDEP - Entrenador"
-                app:titleTextColor="@color/white"
                 app:navigationIcon="@drawable/ic_menu"
-                app:navigationIconTint="@color/white"/>
+                app:title="GESDEP - Entrenador"
+                app:titleCentered="false">
+
+                <FrameLayout
+                    android:id="@+id/btnNotification"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackgroundBorderless">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_notifications"
+                        app:tint="@color/white" />
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/badgeNotification"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginEnd="2dp"
+                        app:cardCornerRadius="5dp"
+                        app:cardBackgroundColor="@color/red_error"
+                        app:cardElevation="0dp"
+                        android:visibility="gone"/>
+                </FrameLayout>
+            </com.google.android.material.appbar.MaterialToolbar>
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.core.widget.NestedScrollView
@@ -42,6 +69,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Welcome Card -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -49,7 +77,6 @@
                     app:cardCornerRadius="16dp"
                     app:cardBackgroundColor="@color/green_primary"
                     app:cardElevation="4dp">
-
                     <ImageView
                         android:layout_width="120dp"
                         android:layout_height="120dp"
@@ -58,127 +85,290 @@
                         android:layout_gravity="end|bottom"
                         android:translationX="20dp"
                         android:translationY="20dp"/>
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:padding="24dp">
-
                         <TextView
-                            android:id="@+id/tvWelcomeCoach"
+                            android:id="@+id/tvWelcome"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="¡Hola, Entrenador!"
                             android:textSize="22sp"
                             android:textColor="@color/white"
                             android:textStyle="bold"
-                            android:layout_marginBottom="4dp" />
-
+                            android:layout_marginBottom="4dp"/>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Gestiona tus entrenamientos"
+                            android:text="Panel de gestión deportiva"
                             android:textSize="14sp"
-                            android:textColor="#E0E0E0" />
+                            android:textColor="#E0E0E0"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
+                <!-- Account Balance Card -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="16dp"
-                    android:baselineAligned="false">
+                    android:layout_marginBottom="24dp">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardEvents"
-                        style="@style/DashboardCardStyle"
+                        android:id="@+id/cardCurrentCredit"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginEnd="8dp">
-                        <LinearLayout style="@style/DashboardContainerStyle">
-                            <ImageView
-                                style="@style/DashboardIconStyle"
-                                android:src="@drawable/ic_calendar"
-                                app:tint="@color/blue_button" />
+                        android:layout_marginEnd="4dp"
+                        app:cardBackgroundColor="@color/green_primary"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="4dp"
+                        style="@style/DashboardCardStyle">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="20dp">
                             <TextView
-                                style="@style/DashboardTextStyle"
-                                android:text="Explorar\nEventos" />
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="SALDO DE LA CUENTA"
+                                android:textColor="@color/white"
+                                android:textSize="14sp"/>
+                            <TextView
+                                android:id="@+id/tvCurrentCredit"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/white"
+                                android:textSize="32sp"
+                                android:textStyle="bold"
+                                tools:text="$0.00 MXN"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardMyEvents"
-                        style="@style/DashboardCardStyle"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp">
-                        <LinearLayout style="@style/DashboardContainerStyle">
-                            <ImageView
-                                style="@style/DashboardIconStyle"
-                                android:src="@drawable/ic_check"
-                                app:tint="@color/green_primary" />
-                            <TextView
-                                style="@style/DashboardTextStyle"
-                                android:text="Mis\nInscripciones" />
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
+                <!-- Statistics Grid Row 1 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:baselineAligned="false">
+                    android:baselineAligned="false"
+                    android:layout_marginBottom="8dp">
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardProfile"
-                        style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginEnd="8dp">
-                        <LinearLayout style="@style/DashboardContainerStyle">
-                            <ImageView
-                                style="@style/DashboardIconStyle"
-                                android:src="@drawable/ic_person"
-                                app:tint="@color/purple_participants" />
+                        android:layout_marginEnd="4dp"
+                        style="@style/DashboardCardStyle">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp"
+                            android:gravity="center">
                             <TextView
-                                style="@style/DashboardTextStyle"
-                                android:text="Mi\nPerfil" />
+                                android:id="@+id/tvCountTeams"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/green_primary"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Equipos"
+                                android:textSize="12sp"
+                                android:gravity="center"
+                                android:textColor="@color/text_primary_color"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/cardLogout"
-                        style="@style/DashboardCardStyle"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="8dp">
-                        <LinearLayout style="@style/DashboardContainerStyle">
-                            <ImageView
-                                style="@style/DashboardIconStyle"
-                                android:src="@drawable/ic_logout"
-                                app:tint="@color/red_error" />
+                        android:layout_marginStart="4dp"
+                        style="@style/DashboardCardStyle">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp"
+                            android:gravity="center">
                             <TextView
-                                style="@style/DashboardTextStyle"
-                                android:text="Cerrar\nSesión"
-                                android:textColor="@color/red_error"/>
+                                android:id="@+id/tvCountClasses"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/green_primary"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Clases Asignadas"
+                                android:textSize="12sp"
+                                android:gravity="center"
+                                android:textColor="@color/text_secondary_color"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
+
+                <!-- Statistics Grid Row 2 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false"
+                    android:layout_marginBottom="24dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        style="@style/DashboardCardStyle">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp"
+                            android:gravity="center">
+                            <TextView
+                                android:id="@+id/tvCountEnrollments"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/green_primary"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Inscripciones"
+                                android:textSize="12sp"
+                                android:gravity="center"
+                                android:textColor="@color/text_primary_color"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        style="@style/DashboardCardStyle">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="12dp"
+                            android:gravity="center">
+                            <TextView
+                                android:id="@+id/tvCountReports"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="28sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/green_primary"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Reportes"
+                                android:textSize="12sp"
+                                android:gravity="center"
+                                android:textColor="@color/text_primary_color"/>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <!-- Quick Actions -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Acciones Rápidas"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary_color"
+                    android:layout_marginBottom="12dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnQuickCreateTeam"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="Crear Equipo"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:icon="@drawable/ic_add"
+                    app:iconGravity="textStart"
+                    app:cornerRadius="12dp"
+                    android:backgroundTint="@color/green_primary"
+                    android:layout_marginBottom="12dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnQuickRecharge"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="RECARGAR SALDO"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:icon="@drawable/ic_attach_money"
+                    app:iconGravity="textStart"
+                    app:cornerRadius="12dp"
+                    android:backgroundTint="@color/blue_button"
+                    android:layout_marginBottom="12dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnQuickMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="Enviar Aviso General"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:icon="@drawable/ic_mail"
+                    app:iconGravity="textStart"
+                    app:cornerRadius="12dp"
+                    android:backgroundTint="@color/orange_dark"
+                    android:layout_marginBottom="24dp"/>
+
+                <!-- Live Events Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="En Curso Ahora"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary_color"
+                    android:layout_marginBottom="8dp"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvLiveEvents"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="100dp"
+                    android:orientation="horizontal" />
+
+                <TextView
+                    android:id="@+id/tvNoLiveEvents"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:text="No hay eventos en vivo en este momento."
+                    android:gravity="center"
+                    android:background="@color/card_surface_color"
+                    android:textColor="@color/text_secondary_color"
+                    android:visibility="gone"/>
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
-
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view_coach"
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

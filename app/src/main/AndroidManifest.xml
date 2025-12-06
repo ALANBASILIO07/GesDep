@@ -69,6 +69,10 @@
         <activity android:name=".ReportsListActivity" android:exported="false" />
         <activity android:name=".ReportDetailActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
 
+        <activity android:name=".CreateTeamActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
+        <activity android:name=".MyTeamsActivity" android:exported="false" />
+        <activity android:name=".TeamDetailActivity" android:exported="false" android:windowSoftInputMode="adjustResize"/>
+
         <activity android:name=".SettingsActivity" android:exported="false" />
 
         <meta-data

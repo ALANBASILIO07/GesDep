@@ -6,29 +6,47 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.uaemex.gesdep.adapters.LiveEventAdapter;
+import com.uaemex.gesdep.models.EventModel;
 import com.uaemex.gesdep.utils.WindowUtils;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class CoachHomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
-    private TextView tvWelcome;
+    private NavigationView navigationView;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+
+    private TextView tvWelcome;
+    private TextView tvCurrentCredit, tvCountTeams, tvCountClasses, tvCountEnrollments, tvCountReports;
+    private MaterialButton btnQuickCreateTeam, btnQuickRecharge, btnQuickMessage;
+
+    private RecyclerView rvLiveEvents;
+    private TextView tvNoLiveEvents;
+    private LiveEventAdapter liveAdapter;
+    private List<EventModel> liveEventsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,27 +58,62 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance("gesdep");
 
-        MaterialToolbar toolbar = findViewById(R.id.toolbarCoach);
+        initViews();
+        setupNavigation();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadDashboardData();
+        loadLiveEvents();
+        loadUserInfo();
+        updateNavHeader();
+    }
+
+    private void initViews() {
+        tvWelcome = findViewById(R.id.tvWelcome);
+        tvCurrentCredit = findViewById(R.id.tvCurrentCredit);
+        tvCountTeams = findViewById(R.id.tvCountTeams);
+        tvCountClasses = findViewById(R.id.tvCountClasses);
+        tvCountEnrollments = findViewById(R.id.tvCountEnrollments);
+        tvCountReports = findViewById(R.id.tvCountReports);
+
+        btnQuickCreateTeam = findViewById(R.id.btnQuickCreateTeam);
+        btnQuickRecharge = findViewById(R.id.btnQuickRecharge);
+        btnQuickMessage = findViewById(R.id.btnQuickMessage);
+
+        rvLiveEvents = findViewById(R.id.rvLiveEvents);
+        tvNoLiveEvents = findViewById(R.id.tvNoLiveEvents);
+
+        liveAdapter = new LiveEventAdapter(liveEventsList);
+        rvLiveEvents.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rvLiveEvents.setAdapter(liveAdapter);
+
+        btnQuickCreateTeam.setOnClickListener(v -> startActivity(new Intent(this, CreateTeamActivity.class)));
+        btnQuickRecharge.setOnClickListener(v -> startActivity(new Intent(this, RechargeActivity.class)));
+        btnQuickMessage.setOnClickListener(v -> startActivity(new Intent(this, CreateReportActivity.class)));
+    }
+
+    private void setupNavigation() {
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        drawerLayout = findViewById(R.id.drawer_layout_coach);
-        NavigationView navigationView = findViewById(R.id.nav_view_coach);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar,
                 R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(android.R.color.white));
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
-
-        tvWelcome = findViewById(R.id.tvWelcomeCoach);
-
-        loadUserInfo();
-        updateNavHeader(navigationView);
-        setupClickListeners();
     }
 
-    private void updateNavHeader(NavigationView navigationView) {
+    private void updateNavHeader() {
+        if (navigationView == null) return;
+
         View headerView = navigationView.getHeaderView(0);
         TextView navName = headerView.findViewById(R.id.navHeaderName);
         TextView navEmail = headerView.findViewById(R.id.navHeaderEmail);
@@ -81,11 +134,11 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
                                         .load(photoUrl)
                                         .apply(RequestOptions.circleCropTransform())
                                         .into(navImage);
-                                navImage.setPadding(0,0,0,0);
+                                navImage.setPadding(0, 0, 0, 0);
                                 navImage.setColorFilter(null);
                             } else {
                                 navImage.setImageResource(R.drawable.ic_trophy);
-                                navImage.setPadding(30,30,30,30);
+                                navImage.setPadding(30, 30, 30, 30);
                                 navImage.setColorFilter(getResources().getColor(R.color.white));
                             }
                         }
@@ -110,14 +163,64 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
         }
     }
 
-    private void setupClickListeners() {
-        findViewById(R.id.cardEvents).setOnClickListener(v ->
-                Toast.makeText(this, "Próximamente: Mis Grupos", Toast.LENGTH_SHORT).show());
-        findViewById(R.id.cardMyEvents).setOnClickListener(v ->
-                Toast.makeText(this, "Próximamente: Mi Horario", Toast.LENGTH_SHORT).show());
-        findViewById(R.id.cardProfile).setOnClickListener(v ->
-                Toast.makeText(this, "Próximamente: Mi Perfil", Toast.LENGTH_SHORT).show());
-        findViewById(R.id.cardLogout).setOnClickListener(v -> logout());
+    private void loadDashboardData() {
+        String coachId = auth.getCurrentUser().getUid();
+
+        // Cargar equipos
+        db.collection("teams")
+                .whereEqualTo("coachId", coachId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    int count = querySnapshot.size();
+                    tvCountTeams.setText(String.valueOf(count));
+                });
+
+        // Cargar clases asignadas (eventos donde es instructor)
+        db.collection("events")
+                .whereEqualTo("coachId", coachId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    int count = querySnapshot.size();
+                    tvCountClasses.setText(String.valueOf(count));
+                });
+
+        // Cargar inscripciones de equipos
+        db.collection("teamEnrollments")
+                .whereEqualTo("coachId", coachId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    int count = querySnapshot.size();
+                    tvCountEnrollments.setText(String.valueOf(count));
+                });
+    }
+
+    private void loadLiveEvents() {
+        Date now = new Date();
+
+        db.collection("events")
+                .whereEqualTo("status", "ACTIVO")
+                .orderBy("startTime", Query.Direction.ASCENDING)
+                .limit(10)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    liveEventsList.clear();
+                    querySnapshot.forEach(doc -> {
+                        EventModel event = doc.toObject(EventModel.class);
+                        String timeStatus = event.getTimeStatus();
+                        if ("EN VIVO".equals(timeStatus) || "PENDIENTE".equals(timeStatus)) {
+                            liveEventsList.add(event);
+                        }
+                    });
+
+                    if (liveEventsList.isEmpty()) {
+                        tvNoLiveEvents.setVisibility(View.VISIBLE);
+                        rvLiveEvents.setVisibility(View.GONE);
+                    } else {
+                        tvNoLiveEvents.setVisibility(View.GONE);
+                        rvLiveEvents.setVisibility(View.VISIBLE);
+                        liveAdapter.notifyDataSetChanged();
+                    }
+                });
     }
 
     @Override
@@ -125,9 +228,11 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
         int id = item.getItemId();
 
         if (id == R.id.nav_coach_home) { }
-        else if (id == R.id.nav_coach_groups) Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show();
-        else if (id == R.id.nav_coach_schedule) Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show();
-        else if (id == R.id.nav_coach_profile) Toast.makeText(this, "Próximamente", Toast.LENGTH_SHORT).show();
+        else if (id == R.id.nav_coach_teams) startActivity(new Intent(this, MyTeamsActivity.class));
+        else if (id == R.id.nav_coach_events) startActivity(new Intent(this, EventsActivity.class));
+        else if (id == R.id.nav_coach_map) startActivity(new Intent(this, MapEventsActivity.class));
+        else if (id == R.id.nav_coach_reports) startActivity(new Intent(this, ReportsListActivity.class));
+        else if (id == R.id.nav_coach_settings) startActivity(new Intent(this, SettingsActivity.class));
         else if (id == R.id.nav_coach_logout) logout();
 
         drawerLayout.closeDrawer(GravityCompat.START);
