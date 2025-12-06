@@ -86,13 +86,26 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
         rvLiveEvents = findViewById(R.id.rvLiveEvents);
         tvNoLiveEvents = findViewById(R.id.tvNoLiveEvents);
 
+        // Asegúrate de tener la clase LiveEventAdapter en la carpeta adapters
         liveAdapter = new LiveEventAdapter(liveEventsList);
         rvLiveEvents.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvLiveEvents.setAdapter(liveAdapter);
 
+        // --- ACCIONES DE BOTONES (CORREGIDO) ---
+
+        // 1. Crear Equipo
         btnQuickCreateTeam.setOnClickListener(v -> startActivity(new Intent(this, CreateTeamActivity.class)));
-        btnQuickRecharge.setOnClickListener(v -> startActivity(new Intent(this, RechargeActivity.class)));
-        btnQuickMessage.setOnClickListener(v -> startActivity(new Intent(this, CreateReportActivity.class)));
+
+        // 2. Recargar Saldo: Apunta a CreditActivity (asociado a activity_credit.xml)
+        btnQuickRecharge.setOnClickListener(v -> startActivity(new Intent(this, CreditActivity.class)));
+
+        // 3. Aviso General: Apunta a CreateReportActivity con extras específicos
+        btnQuickMessage.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CreateReportActivity.class);
+            intent.putExtra("eventId", "GENERAL"); // Indica que no está atado a una clase específica
+            intent.putExtra("eventName", "Aviso General");
+            startActivity(intent);
+        });
     }
 
     private void setupNavigation() {
@@ -129,6 +142,9 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
                             if (name != null) navName.setText(name);
 
                             String photoUrl = doc.getString("photoUrl");
+                            // Fallback a profilePhotoUrl si photoUrl está vacío (por compatibilidad)
+                            if (photoUrl == null) photoUrl = doc.getString("profilePhotoUrl");
+
                             if (photoUrl != null && !photoUrl.isEmpty()) {
                                 Glide.with(this)
                                         .load(photoUrl)
@@ -139,7 +155,7 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
                             } else {
                                 navImage.setImageResource(R.drawable.ic_trophy);
                                 navImage.setPadding(30, 30, 30, 30);
-                                navImage.setColorFilter(getResources().getColor(R.color.white));
+                                navImage.setColorFilter(getResources().getColor(android.R.color.white));
                             }
                         }
                     });
@@ -214,8 +230,7 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
     }
 
     private void loadLiveEvents() {
-        Date now = new Date();
-
+        // Lógica para eventos en vivo
         db.collection("events")
                 .whereEqualTo("status", "ACTIVO")
                 .orderBy("startTime", Query.Direction.ASCENDING)
@@ -225,6 +240,9 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
                     liveEventsList.clear();
                     querySnapshot.forEach(doc -> {
                         EventModel event = doc.toObject(EventModel.class);
+                        // Asignar ID del documento al modelo si no viene incluido
+                        event.setId(doc.getId());
+
                         String timeStatus = event.getTimeStatus();
                         if ("EN VIVO".equals(timeStatus) || "PENDIENTE".equals(timeStatus)) {
                             liveEventsList.add(event);
@@ -246,7 +264,9 @@ public class CoachHomeActivity extends AppCompatActivity implements NavigationVi
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_coach_home) { }
+        if (id == R.id.nav_coach_home) {
+            // Ya estamos aquí
+        }
         else if (id == R.id.nav_coach_teams) startActivity(new Intent(this, MyTeamsActivity.class));
         else if (id == R.id.nav_coach_events) startActivity(new Intent(this, EventsActivity.class));
         else if (id == R.id.nav_coach_map) startActivity(new Intent(this, MapEventsActivity.class));

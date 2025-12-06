@@ -41,6 +41,7 @@ public class MyTeamsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_teams);
 
+        // 1. ESTO PINTA LA BARRA DE ESTADO DE VERDE (CRÍTICO)
         WindowUtils.setGreenStatusBar(this);
 
         auth = FirebaseAuth.getInstance();
@@ -54,12 +55,14 @@ public class MyTeamsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadTeams(); // Reload when returning from create/detail
+        loadTeams();
     }
 
     private void initViews() {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Configurar la flecha de regreso
         toolbar.setNavigationOnClickListener(v -> finish());
 
         rvTeams = findViewById(R.id.rvTeams);
@@ -91,7 +94,10 @@ public class MyTeamsActivity extends AppCompatActivity {
                     teamsList.clear();
                     querySnapshot.forEach(doc -> {
                         TeamModel team = doc.toObject(TeamModel.class);
-                        teamsList.add(team);
+                        if (team != null) {
+                            team.id = doc.getId();
+                            teamsList.add(team);
+                        }
                     });
 
                     progressBar.setVisibility(View.GONE);
@@ -108,13 +114,16 @@ public class MyTeamsActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
                     tvNoTeams.setVisibility(View.VISIBLE);
-                    tvNoTeams.setText("Error al cargar equipos");
+                    // Si falla por índice, mostrará vacío temporalmente hasta que se cree el índice
+                    if (teamsList.isEmpty()) {
+                        tvNoTeams.setText("No se encontraron equipos o faltan índices.");
+                    }
                 });
     }
 
     private void openTeamDetail(TeamModel team) {
         Intent intent = new Intent(this, TeamDetailActivity.class);
-        intent.putExtra("team", team);
+        intent.putExtra("teamModel", team);
         startActivity(intent);
     }
 }

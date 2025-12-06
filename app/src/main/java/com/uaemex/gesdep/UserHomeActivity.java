@@ -90,9 +90,21 @@ public class UserHomeActivity extends AppCompatActivity implements NavigationVie
         rvLiveEvents.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         rvLiveEvents.setAdapter(liveAdapter);
 
+        // --- ACCIONES DE BOTONES CORREGIDAS ---
+
+        // 1. Explorar Eventos
         btnQuickExploreEvents.setOnClickListener(v -> startActivity(new Intent(this, EventsActivity.class)));
-        btnQuickRecharge.setOnClickListener(v -> startActivity(new Intent(this, RechargeActivity.class)));
-        btnQuickMessage.setOnClickListener(v -> startActivity(new Intent(this, CreateReportActivity.class)));
+
+        // 2. Recargar Saldo: Apunta a CreditActivity (asociado a activity_credit.xml)
+        btnQuickRecharge.setOnClickListener(v -> startActivity(new Intent(this, CreditActivity.class)));
+
+        // 3. Aviso General: Apunta a CreateReportActivity con extras específicos
+        btnQuickMessage.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CreateReportActivity.class);
+            intent.putExtra("eventId", "GENERAL");
+            intent.putExtra("eventName", "Aviso General");
+            startActivity(intent);
+        });
     }
 
     private void setupNavigation() {
@@ -129,6 +141,9 @@ public class UserHomeActivity extends AppCompatActivity implements NavigationVie
                             if (name != null) navName.setText(name);
 
                             String photoUrl = doc.getString("photoUrl");
+                            // Fallback a profilePhotoUrl si photoUrl es nulo
+                            if (photoUrl == null) photoUrl = doc.getString("profilePhotoUrl");
+
                             if (photoUrl != null && !photoUrl.isEmpty()) {
                                 Glide.with(this)
                                         .load(photoUrl)
@@ -234,6 +249,9 @@ public class UserHomeActivity extends AppCompatActivity implements NavigationVie
                     liveEventsList.clear();
                     querySnapshot.forEach(doc -> {
                         EventModel event = doc.toObject(EventModel.class);
+                        // Asegurar que el ID esté seteado
+                        event.setId(doc.getId());
+
                         String timeStatus = event.getTimeStatus();
                         if ("EN VIVO".equals(timeStatus) || "PENDIENTE".equals(timeStatus)) {
                             liveEventsList.add(event);
@@ -255,8 +273,10 @@ public class UserHomeActivity extends AppCompatActivity implements NavigationVie
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_user_home) { }
-        else if (id == R.id.nav_user_enrollments) startActivity(new Intent(this, EventsActivity.class)); // TODO: Create MyEnrollmentsActivity
+        if (id == R.id.nav_user_home) {
+            // Ya estamos aquí
+        }
+        else if (id == R.id.nav_user_enrollments) startActivity(new Intent(this, EventsActivity.class));
         else if (id == R.id.nav_user_events) startActivity(new Intent(this, EventsActivity.class));
         else if (id == R.id.nav_user_map) startActivity(new Intent(this, MapEventsActivity.class));
         else if (id == R.id.nav_user_reports) startActivity(new Intent(this, ReportsListActivity.class));

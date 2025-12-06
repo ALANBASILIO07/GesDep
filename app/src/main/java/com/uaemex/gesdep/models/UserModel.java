@@ -7,7 +7,8 @@ import java.util.Date;
 import com.google.firebase.firestore.Exclude;
 
 /**
- * Modelo de Usuario con campos de crédito y correcciones de mapeo de Firestore.
+ * Modelo de Usuario ROBUSTO
+ * Soluciona el error: java.lang.RuntimeException: Failed to convert value of type java.lang.Long to Date
  */
 public class UserModel implements Serializable {
 
@@ -18,19 +19,20 @@ public class UserModel implements Serializable {
     private String userType;
     private String phone;
 
-    // Si el campo en DB se llama 'photoUrl' pero en Java es 'profilePhotoUrl',
-    // usamos @PropertyName para mapear.
+    // Mapeo especial para foto de perfil
+    @PropertyName("photoUrl")
     private String profilePhotoUrl;
 
     private String institution;
 
-    // --- CRÍTICO: Usamos Date ---
+    // --- CAMPOS DE FECHA PRIVADOS (Para forzar el uso de setters inteligentes) ---
     private Date createdAt;
     private Date lastLogin;
+    // ----------------------------------------------------------------------------
 
     // Token y Crédito
     private String fcmToken;
-    private double appCredit = 0.0; // Saldo disponible
+    private double appCredit = 0.0;
 
     // Estadísticas
     private int eventsRegistered;
@@ -78,55 +80,88 @@ public class UserModel implements Serializable {
         this.teamsLeading = 0;
     }
 
-    // Getters
+    // Getters y Setters normales
     public String getUid() { return uid; }
+    public void setUid(String uid) { this.uid = uid; }
+
     public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
     public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
     public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
     public String getUserType() { return userType; }
+    public void setUserType(String userType) { this.userType = userType; }
+
     public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    // Helper para compatibilidad si alguna vista llama a getPhoneNumber()
+    @Exclude
+    public String getPhoneNumber() { return phone; }
 
     @PropertyName("photoUrl")
     public String getProfilePhotoUrl() { return profilePhotoUrl; }
 
-    public String getInstitution() { return institution; }
-
-    // Getters CRÍTICOS (Usan Date)
-    public Date getCreatedAt() { return createdAt; }
-    public Date getLastLogin() { return lastLogin; }
-    public double getAppCredit() { return appCredit; }
-
-    public String getFcmToken() { return fcmToken; }
-    public int getEventsRegistered() { return eventsRegistered; }
-    public int getEventsCompleted() { return eventsCompleted; }
-    public int getTeamsLeading() { return teamsLeading; }
-
-    // Setters
-    public void setUid(String uid) { this.uid = uid; }
-    public void setName(String name) { this.name = name; }
-    public void setEmail(String email) { this.email = email; }
-    public void setRole(String role) { this.role = role; }
-    public void setUserType(String userType) { this.userType = userType; }
-    public void setPhone(String phone) { this.phone = phone; }
-
     @PropertyName("photoUrl")
     public void setProfilePhotoUrl(String profilePhotoUrl) { this.profilePhotoUrl = profilePhotoUrl; }
 
+    public String getInstitution() { return institution; }
     public void setInstitution(String institution) { this.institution = institution; }
 
-    // Setters CRÍTICOS (Usan Date)
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
-    public void setLastLogin(Date lastLogin) { this.lastLogin = lastLogin; }
+
+    // --- SECCIÓN CRÍTICA: MANEJO DE FECHAS ROBUSTO ---
+
+    @PropertyName("createdAt")
+    public Date getCreatedAt() { return createdAt; }
+
+    @PropertyName("createdAt")
+    public void setCreatedAt(Object timestamp) {
+        this.createdAt = convertToDate(timestamp);
+    }
+
+    @PropertyName("lastLogin")
+    public Date getLastLogin() { return lastLogin; }
+
+    @PropertyName("lastLogin")
+    public void setLastLogin(Object timestamp) {
+        this.lastLogin = convertToDate(timestamp);
+    }
+
+    // Método mágico que convierte Long o Timestamp a Date
+    private Date convertToDate(Object timestamp) {
+        if (timestamp == null) return null;
+        if (timestamp instanceof Date) {
+            return (Date) timestamp;
+        } else if (timestamp instanceof Timestamp) {
+            return ((Timestamp) timestamp).toDate();
+        } else if (timestamp instanceof Long) {
+            return new Date((Long) timestamp);
+        }
+        return null;
+    }
+    // ---------------------------------------------------
+
+    public double getAppCredit() { return appCredit; }
     public void setAppCredit(double appCredit) { this.appCredit = appCredit; }
 
+    public String getFcmToken() { return fcmToken; }
     public void setFcmToken(String fcmToken) { this.fcmToken = fcmToken; }
+
+    public int getEventsRegistered() { return eventsRegistered; }
     public void setEventsRegistered(int eventsRegistered) { this.eventsRegistered = eventsRegistered; }
+
+    public int getEventsCompleted() { return eventsCompleted; }
     public void setEventsCompleted(int eventsCompleted) { this.eventsCompleted = eventsCompleted; }
+
+    public int getTeamsLeading() { return teamsLeading; }
     public void setTeamsLeading(int teamsLeading) { this.teamsLeading = teamsLeading; }
 
+    @Exclude
     public boolean isAdmin() { return "admin".equals(role); }
+    @Exclude
     public boolean isTeamLeader() { return "team_leader".equals(userType); }
-    public void incrementEventsRegistered() { this.eventsRegistered++; }
-    public void incrementEventsCompleted() { this.eventsCompleted++; }
-    public void incrementTeamsLeading() { this.teamsLeading++; }
 }

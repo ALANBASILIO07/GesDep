@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat; // Importante para colores seguros
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.uaemex.gesdep.R;
@@ -62,13 +63,13 @@ public class TeamsAdapter extends RecyclerView.Adapter<TeamsAdapter.TeamViewHold
             tvTeamName.setText(team.teamName);
             tvDiscipline.setText(team.discipline + " · " + team.category);
 
-            // Estado
+            // Estado (Colores corregidos usando ContextCompat)
             if ("active".equals(team.status)) {
                 tvStatus.setText("ACTIVO");
-                tvStatus.setTextColor(itemView.getContext().getResources().getColor(R.color.green_primary, null));
+                tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.green_primary));
             } else {
                 tvStatus.setText("INACTIVO");
-                tvStatus.setTextColor(itemView.getContext().getResources().getColor(R.color.text_secondary_color, null));
+                tvStatus.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.text_secondary_color));
             }
 
             // Contadores

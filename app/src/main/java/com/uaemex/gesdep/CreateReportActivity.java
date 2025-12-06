@@ -39,7 +39,6 @@ import java.util.Map;
 
 public class CreateReportActivity extends AppCompatActivity {
 
-    // ... (Mismas variables) ...
     private MaterialToolbar toolbar;
     private TextView tvEventName, tvPriorityValue;
     private TextInputEditText etSubject, etDescription;
@@ -80,7 +79,7 @@ public class CreateReportActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_report);
 
-        // CRÍTICO: Asegura la barra verde
+        // Configurar barra de estado verde
         WindowUtils.setGreenStatusBar(this);
 
         eventId = getIntent().getStringExtra("eventId");
@@ -101,10 +100,6 @@ public class CreateReportActivity extends AppCompatActivity {
         loadUserData();
         setupListeners();
     }
-
-    // ... (Resto de métodos initViews, setupCategoryDropdown, etc. IGUAL QUE ANTES) ...
-    // Solo asegúrate de que initViews use los IDs correctos del nuevo XML.
-    // Son los mismos IDs, así que tu código anterior funciona perfecto.
 
     private void initViews() {
         toolbar = findViewById(R.id.toolbar);
@@ -250,7 +245,10 @@ public class CreateReportActivity extends AppCompatActivity {
         reportData.put("reportId", report.getReportId());
         reportData.put("eventId", report.getEventId());
         reportData.put("eventName", report.getEventName());
-        reportData.put("createdByUid", report.getCreatedByUid());
+
+        // --- AQUÍ ESTÁ EL CAMBIO CRÍTICO: Usamos "reporterId" ---
+        reportData.put("reporterId", report.getCreatedByUid());
+
         reportData.put("createdByName", report.getCreatedByName());
         reportData.put("createdByRole", report.getCreatedByRole());
         reportData.put("subject", report.getSubject());
